@@ -15,8 +15,8 @@ function WeightChart({ measurements }) {
   const diff = data[data.length - 1].poids - data[0].poids;
   const diffColor = diff < 0 ? C.green : diff > 0 ? C.red : C.muted;
   return (
-    <div style={{ background: C.s2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "20px 16px", marginBottom: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+    <div style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${C.border}`, borderRadius: 14, padding: "22px 20px", marginBottom: 24, boxShadow: C.shadow1 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
         <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>📊 Évolution du poids</span>
         <span style={{ color: diffColor, fontWeight: 700, fontSize: 13, background: `${diffColor}18`, padding: "4px 12px", borderRadius: 20, border: `1px solid ${diffColor}44` }}>
           {diff > 0 ? "+" : ""}{diff.toFixed(1)} kg
@@ -41,7 +41,7 @@ function MacroBar({ prot, lip, gluc }) {
   const pP = Math.round((prot * 4 / tot) * 100), pL = Math.round((lip * 9 / tot) * 100), pG = 100 - pP - pL;
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ display: "flex", borderRadius: 6, overflow: "hidden", height: 7, marginBottom: 6 }}>
+      <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", height: 6, marginBottom: 8 }}>
         <div style={{ width: `${pP}%`, background: "#5aaccc" }} /><div style={{ width: `${pL}%`, background: C.gold }} /><div style={{ width: `${pG}%`, background: "#9a77cc" }} />
       </div>
       <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
@@ -55,7 +55,10 @@ function MacroBar({ prot, lip, gluc }) {
 
 function NutritionCard({ label, emoji, data, accent, note }) {
   return (
-    <div style={{ background: C.s2, border: `1px solid ${accent ? C.goldBorder : C.border}`, borderRadius: 12, padding: "16px 18px" }}>
+    <div
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.shadow2; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.shadow1; }}
+      style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${accent ? C.goldBorder : C.border}`, borderRadius: 14, padding: "18px 20px", transition: "all 0.25s ease", boxShadow: C.shadow1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
           <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{emoji} {label}</div>
@@ -79,7 +82,7 @@ function AnalyseTab({ client, onEdit }) {
   );
   return (
     <div>
-      <div style={{ background: C.s2, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 20px", marginBottom: 20, display: "flex", gap: 28, flexWrap: "wrap" }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${C.border}`, borderRadius: 14, padding: "18px 22px", marginBottom: 22, display: "flex", gap: 28, flexWrap: "wrap", boxShadow: C.shadow1 }}>
         {[{ l: "Poids", v: `${n.poids} kg` }, { l: "Taille", v: `${client.height} cm` }, { l: "Âge", v: `${client.age} ans` }, { l: "Sexe", v: client.sexe === "femme" ? "Femme" : "Homme" }, { l: "Activité", v: n.actLabel }, { l: "IMC", v: `${n.imc} · ${n.imcLabel}` }, { l: "Métabolisme de base", v: `${n.bmr} kcal` }, { l: "TDEE", v: `${n.tdee} kcal` }].map(i => (
           <div key={i.l}><div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.07em" }}>{i.l}</div><div style={{ color: C.text, fontWeight: 600, fontSize: 14, marginTop: 3 }}>{i.v}</div></div>
         ))}
@@ -90,8 +93,8 @@ function AnalyseTab({ client, onEdit }) {
         <NutritionCard label="Perte de masse grasse" emoji="🔥" data={n.perteMG} note="-400 kcal" />
         <NutritionCard label="Prise de masse" emoji="💪" data={n.priseMasse} note="+300 kcal" />
       </div>
-      <div style={{ background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, borderRadius: 12, padding: "16px 18px" }}>
-        <div style={{ color: C.gold, fontWeight: 700, fontSize: 12, marginBottom: 10 }}>💡 Recommandations personnalisées</div>
+      <div style={{ background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.06))`, border: `1px solid ${C.goldBorder}`, borderRadius: 14, padding: "18px 20px", boxShadow: `0 4px 16px rgba(201,168,76,0.08)` }}>
+        <div style={{ color: C.gold, fontWeight: 700, fontSize: 12, marginBottom: 12, letterSpacing: "0.02em" }}>💡 Recommandations personnalisées</div>
         {[
           `🥩 Protéines cibles : ${Math.round(n.poids * 2)}g/jour (2g par kg de poids corporel)`,
           `💧 Hydratation : ${(n.poids * 0.035).toFixed(1)}L d'eau/jour minimum`,
@@ -266,7 +269,7 @@ function PacksTab({ client, onAdd, mutations }) {
           const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
           const urgColor = remaining === 0 ? C.red : remaining <= 2 ? C.orange : C.green;
           return (
-            <div key={pack.id} style={{ background: C.s2, border: `1px solid ${remaining === 0 ? C.redAlpha.replace("0.12", "0.4") : C.border}`, borderRadius: 12, padding: "18px 20px", marginBottom: 12 }}>
+            <div key={pack.id} style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${remaining === 0 ? C.redAlpha.replace("0.12", "0.4") : C.border}`, borderRadius: 14, padding: "20px 22px", marginBottom: 14, boxShadow: C.shadow1, transition: "all 0.2s ease" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                 <div>
                   <div style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{pack.name}</div>
@@ -280,8 +283,8 @@ function PacksTab({ client, onAdd, mutations }) {
                   <button onClick={() => { if (window.confirm("Supprimer ce pack ?")) mutations.removePack(pack.id); }} style={{ background: "none", border: "none", color: C.red, cursor: "pointer", opacity: 0.5, fontSize: 16, padding: 4 }}>✕</button>
                 </div>
               </div>
-              <div style={{ background: C.s3, borderRadius: 8, height: 10, marginBottom: 10, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? C.red : pct >= 75 ? C.orange : C.gold, borderRadius: 8, transition: "width 0.4s ease" }} />
+              <div style={{ background: C.s3, borderRadius: 10, height: 8, marginBottom: 12, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${pct}%`, background: pct === 100 ? `linear-gradient(90deg, ${C.red}, #e05555)` : pct >= 75 ? `linear-gradient(90deg, ${C.orange}, #dda040)` : `linear-gradient(90deg, ${C.gold}, ${C.goldLight})`, borderRadius: 10, transition: "width 0.5s ease", boxShadow: `0 0 8px ${pct === 100 ? 'rgba(204,68,68,0.3)' : pct >= 75 ? 'rgba(204,136,51,0.3)' : 'rgba(201,168,76,0.3)'}` }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                 <span style={{ color: C.muted, fontSize: 12 }}>{used} / {total} séances utilisées</span>
@@ -561,15 +564,18 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
   return (
     <div>
       {relanceOpen && <RelanceModal client={client} pendingPayments={pendingPayments} onClose={() => setRelanceOpen(false)} />}
-      <div style={{ background: C.s1, borderBottom: `1px solid ${C.border}`, padding: "24px 40px" }}>
-        <button onClick={onBack} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 13, marginBottom: 16, padding: 0, display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit" }}>← Retour à la liste</button>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-            <div style={{ width: 58, height: 58, borderRadius: "50%", background: C.goldAlpha, border: `2px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ color: C.gold, fontWeight: 700, fontSize: 22, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{(client.firstName || "?")[0]}{(client.lastName || "")[0]}</span>
+      <div style={{ background: `linear-gradient(180deg, ${C.s1}, ${C.bg})`, borderBottom: `1px solid ${C.border}`, padding: "28px 44px" }}>
+        <button onClick={onBack}
+          onMouseEnter={e => { e.currentTarget.style.color = C.gold; }}
+          onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
+          style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 13, marginBottom: 18, padding: 0, display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit", transition: "color 0.15s" }}>← Retour à la liste</button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", animation: "fadeIn 0.3s ease" }}>
+          <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+            <div style={{ width: 62, height: 62, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.22))`, border: `2px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
+              <span style={{ color: C.gold, fontWeight: 700, fontSize: 24, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{(client.firstName || "?")[0]}{(client.lastName || "")[0]}</span>
             </div>
             <div>
-              <h2 style={{ color: C.text, fontSize: 20, fontWeight: 700, margin: "0 0 7px", fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{client.firstName} {client.lastName}</h2>
+              <h2 style={{ color: C.text, fontSize: 22, fontWeight: 700, margin: "0 0 8px", fontFamily: "'Cormorant Garamond',Georgia,serif", letterSpacing: "-0.01em" }}>{client.firstName} {client.lastName}</h2>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
                 {client.email && <span style={{ color: C.muted, fontSize: 12 }}>✉ {client.email}</span>}
                 {client.phone && <span style={{ color: C.muted, fontSize: 12 }}>📱 {client.phone}</span>}
@@ -587,7 +593,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
             <Btn variant="danger" onClick={() => { if (window.confirm(`Supprimer ${client.firstName} ${client.lastName} ?`)) mutations.delete(); }}>Supprimer</Btn>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 22, marginTop: 18, paddingTop: 16, borderTop: `1px solid ${C.border}`, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, flexWrap: "wrap" }}>
           <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.text }}>{sessions.length}</strong> séances</span>
           <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.green }}>{fmoney(totalPaid)}</strong> encaissé</span>
           {pendingAmt > 0 && <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.orange }}>{fmoney(pendingAmt)}</strong> en attente</span>}
@@ -595,17 +601,19 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         </div>
       </div>
 
-      <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, background: C.s1, paddingLeft: 40, overflowX: "auto" }}>
+      <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, background: C.s1, paddingLeft: 44, overflowX: "auto", gap: 2 }}>
         {tabs.map(t => (
           <button key={t.id} onClick={() => onTab(t.id)}
-            style={{ padding: "13px 18px", border: "none", borderBottom: `2px solid ${tab === t.id ? C.gold : "transparent"}`, background: "transparent", color: tab === t.id ? C.gold : C.muted, fontWeight: tab === t.id ? 600 : 400, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            onMouseEnter={e => { if (tab !== t.id) e.currentTarget.style.color = C.text; }}
+            onMouseLeave={e => { if (tab !== t.id) e.currentTarget.style.color = C.muted; }}
+            style={{ padding: "14px 18px", border: "none", borderBottom: `2px solid ${tab === t.id ? C.gold : "transparent"}`, background: tab === t.id ? C.goldAlpha : "transparent", color: tab === t.id ? C.gold : C.muted, fontWeight: tab === t.id ? 600 : 400, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontFamily: "inherit", whiteSpace: "nowrap", transition: "all 0.15s", borderRadius: "8px 8px 0 0" }}>
             {t.label}
-            {t.count !== null && <span style={{ background: t.alert ? C.orangeAlpha : C.s3, border: t.alert ? `1px solid ${C.orange}44` : "none", borderRadius: 10, padding: "1px 7px", fontSize: 10, color: t.alert ? C.orange : (tab === t.id ? C.gold : C.muted) }}>{t.count}</span>}
+            {t.count !== null && <span style={{ background: t.alert ? C.orangeAlpha : (tab === t.id ? "rgba(201,168,76,0.15)" : C.s3), border: t.alert ? `1px solid ${C.orange}44` : "none", borderRadius: 10, padding: "2px 8px", fontSize: 10, fontWeight: 600, color: t.alert ? C.orange : (tab === t.id ? C.gold : C.muted), transition: "all 0.15s" }}>{t.count}</span>}
           </button>
         ))}
       </div>
 
-      <div style={{ padding: "28px 40px" }}>
+      <div style={{ padding: "32px 44px" }}>
         {tab === "sessions" && <TabSection title="Historique des séances" onAdd={handlers.addSession}>
           {sessions.length === 0 ? <Empty icon="🏋️" text="Aucune séance enregistrée" /> :
             [...sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).map(s => (
@@ -625,7 +633,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         {tab === "measurements" && <TabSection title="Mensurations & poids" onAdd={handlers.addMeasurement}>
           <WeightChart measurements={measurements} />
           {measurements.length === 0 ? <Empty icon="📏" text="Aucune mensuration enregistrée" /> :
-            <div style={{ overflowX: "auto", background: C.s1, borderRadius: 12, border: `1px solid ${C.border}` }}>
+            <div style={{ overflowX: "auto", background: C.s1, borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: C.shadow1 }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead><tr style={{ borderBottom: `1px solid ${C.border}` }}>
                   {["Date", "Poids", "Poitrine", "Taille", "Hanches", "Bras", "Cuisses", ""].map(h => (
@@ -652,9 +660,12 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         {tab === "goals" && <TabSection title="Objectifs & progression" onAdd={handlers.addGoal}>
           {goals.length === 0 ? <Empty icon="🎯" text="Aucun objectif défini" /> :
             goals.map(g => (
-              <div key={g.id} style={{ background: C.s2, border: `1px solid ${g.completed ? C.goldBorder : C.border}`, borderRadius: 10, padding: "14px 16px", display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 10 }}>
-                <button onClick={() => mutations.toggleGoal(g.id, !g.completed)} style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${g.completed ? C.gold : C.muted2}`, background: g.completed ? C.goldAlpha : "transparent", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-                  {g.completed && <span style={{ color: C.gold, fontSize: 11, lineHeight: 1 }}>✓</span>}
+              <div key={g.id} style={{ background: C.s2, border: `1px solid ${g.completed ? C.goldBorder : C.border}`, borderRadius: 12, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 12, transition: "all 0.2s ease" }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = C.shadow1; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; }}
+              >
+                <button onClick={() => mutations.toggleGoal(g.id, !g.completed)} style={{ width: 24, height: 24, borderRadius: 8, border: `2px solid ${g.completed ? C.gold : C.muted2}`, background: g.completed ? C.goldAlpha : "transparent", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", marginTop: 1, transition: "all 0.2s ease" }}>
+                  {g.completed && <span style={{ color: C.gold, fontSize: 12, lineHeight: 1 }}>✓</span>}
                 </button>
                 <div style={{ flex: 1 }}>
                   <div style={{ color: g.completed ? C.muted : C.text, fontWeight: 600, textDecoration: g.completed ? "line-through" : "none" }}>{g.title}</div>

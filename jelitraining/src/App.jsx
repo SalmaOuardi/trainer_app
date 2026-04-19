@@ -127,37 +127,52 @@ export default function App() {
   const navItems = [{ id: "dashboard", icon: "◈", label: "Dashboard" }, { id: "clients", icon: "◉", label: "Mes clients" }];
   const closeNav = () => setSideOpen(false);
 
-  if (loading) return <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", color: C.gold, fontFamily: "sans-serif" }}>Chargement…</div>;
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: C.gold, fontFamily: "'Inter',system-ui,sans-serif", gap: 20 }}>
+      <div style={{ width: 48, height: 48, borderRadius: "50%", background: C.goldAlpha, border: `2px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", animation: "pulse 1.5s ease-in-out infinite" }}>
+        <span style={{ color: C.gold, fontSize: 16, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
+      </div>
+      <span style={{ fontSize: 13, letterSpacing: "0.08em", fontWeight: 500 }}>Chargement…</span>
+    </div>
+  );
+
+  const SideBtn = ({ onClick, icon, label }) => (
+    <button onClick={onClick}
+      onMouseEnter={e => { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; }}
+      style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit", marginBottom: 2, transition: "all 0.15s" }}>
+      <span style={{ fontSize: 14 }}>{icon}</span>{label}
+    </button>
+  );
 
   const SidebarContent = ({ onNav }) => <>
-    <div style={{ padding: "20px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ width: 36, height: 36, borderRadius: "50%", background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+    <div style={{ padding: "22px 18px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.2))`, border: `1.5px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
         <span style={{ color: C.gold, fontSize: 13, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
       </div>
-      <div><div style={{ color: C.text, fontSize: 11, fontWeight: 700, letterSpacing: "0.07em" }}>JELITRAINING</div><div style={{ color: C.muted, fontSize: 10 }}>Coach Dashboard</div></div>
+      <div>
+        <div style={{ color: C.text, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em" }}>JELI<span style={{ color: C.gold }}>TRAINING</span></div>
+        <div style={{ color: C.muted, fontSize: 10, marginTop: 1 }}>Coach Dashboard</div>
+      </div>
     </div>
-    <nav style={{ flex: 1, padding: "12px 8px" }}>
+    <nav style={{ flex: 1, padding: "14px 10px" }}>
       {navItems.map(item => {
         const active = view === item.id || (view === "detail" && item.id === "clients");
         return (
           <button key={item.id} onClick={() => { setView(item.id); onNav && onNav(); }}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 12px", borderRadius: 8, background: active ? C.goldAlpha : "transparent", border: "none", cursor: "pointer", color: active ? C.gold : C.muted, fontSize: 13, fontWeight: active ? 600 : 400, textAlign: "left", marginBottom: 2, fontFamily: "inherit" }}>
-            <span style={{ fontSize: 16 }}>{item.icon}</span>{item.label}
+            onMouseEnter={e => { if (!active) { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; } }}
+            onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; } }}
+            style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 10, background: active ? C.goldAlpha : "transparent", border: active ? `1px solid ${C.goldBorder}` : "1px solid transparent", cursor: "pointer", color: active ? C.gold : C.muted, fontSize: 13, fontWeight: active ? 600 : 400, textAlign: "left", marginBottom: 4, fontFamily: "inherit", transition: "all 0.2s ease" }}>
+            <span style={{ fontSize: 16, opacity: active ? 1 : 0.7 }}>{item.icon}</span>{item.label}
           </button>
         );
       })}
     </nav>
-    <div style={{ padding: "12px 10px", borderTop: `1px solid ${C.border}` }}>
-      {saveStatus !== "idle" && <div style={{ marginBottom: 8, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
-      <button onClick={exportData} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit", marginBottom: 2 }}>
-        <span style={{ fontSize: 14 }}>💾</span>Exporter mes données
-      </button>
-      <button onClick={importData} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit" }}>
-        <span style={{ fontSize: 14 }}>📂</span>Importer des données
-      </button>
-      <button onClick={() => setChangePwOpen(true)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit" }}>
-        <span style={{ fontSize: 14 }}>🔑</span>Changer le mot de passe
-      </button>
+    <div style={{ padding: "14px 10px", borderTop: `1px solid ${C.border}` }}>
+      {saveStatus !== "idle" && <div style={{ marginBottom: 10, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
+      <SideBtn onClick={exportData} icon="💾" label="Exporter mes données" />
+      <SideBtn onClick={importData} icon="📂" label="Importer des données" />
+      <SideBtn onClick={() => setChangePwOpen(true)} icon="🔑" label="Changer le mot de passe" />
     </div>
   </>;
 
@@ -165,19 +180,14 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", fontFamily: "'Inter',system-ui,sans-serif", color: C.text }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
-        *{box-sizing:border-box;}
-        ::-webkit-scrollbar{width:5px;background:${C.bg};}
-        ::-webkit-scrollbar-thumb{background:${C.s3};border-radius:3px;}
-        input:focus,select:focus,textarea:focus{border-color:${C.gold}!important;outline:none;box-shadow:0 0 0 2px ${C.goldAlpha};}
-        @media(min-width:768px){.app-layout{flex-direction:row!important;}.desktop-sidebar{display:flex!important;}.mobile-topbar{display:none!important;}}
       `}</style>
 
-      <div className="mobile-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", background: C.s1, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 200 }}>
+      <div className="mobile-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", background: C.s1, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 200, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.2))`, border: `1.5px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: C.shadowGold }}>
             <span style={{ color: C.gold, fontSize: 11, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
           </div>
-          <span style={{ color: C.text, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em" }}>JELITRAINING</span>
+          <span style={{ color: C.text, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em" }}>JELI<span style={{ color: C.gold }}>TRAINING</span></span>
           <SaveBadge status={saveStatus} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -191,8 +201,8 @@ export default function App() {
         </div>
       </div>
 
-      {sideOpen && <div onClick={closeNav} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 300 }}>
-        <div onClick={e => e.stopPropagation()} style={{ width: 240, height: "100%", background: C.s1, borderRight: `1px solid ${C.goldBorder}`, display: "flex", flexDirection: "column" }}>
+      {sideOpen && <div onClick={closeNav} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 300, animation: "fadeIn 0.15s ease" }}>
+        <div onClick={e => e.stopPropagation()} style={{ width: 260, height: "100%", background: C.s1, borderRight: `1px solid ${C.goldBorder}`, display: "flex", flexDirection: "column", boxShadow: "4px 0 20px rgba(0,0,0,0.5)" }}>
           <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 14px" }}>
             <button onClick={closeNav} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
           </div>
@@ -201,7 +211,7 @@ export default function App() {
       </div>}
 
       <div className="app-layout" style={{ display: "flex", flex: 1 }}>
-        <aside className="desktop-sidebar" style={{ display: "none", width: 220, background: C.s1, borderRight: `1px solid ${C.border}`, flexDirection: "column", flexShrink: 0, minHeight: "100vh" }}>
+        <aside className="desktop-sidebar" style={{ display: "none", width: 230, background: `linear-gradient(180deg, ${C.s1} 0%, #0c0c0c 100%)`, borderRight: `1px solid ${C.border}`, flexDirection: "column", flexShrink: 0, minHeight: "100vh", position: "sticky", top: 0, height: "100vh", overflowY: "auto" }}>
           <SidebarContent />
         </aside>
         <main style={{ flex: 1, overflowY: "auto" }}>

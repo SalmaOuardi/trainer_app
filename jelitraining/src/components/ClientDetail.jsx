@@ -118,6 +118,14 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
   const calTarget = nutri ? (prog.goal?.toLowerCase().includes("masse") ? nutri.priseMasse : prog.goal?.toLowerCase().includes("perte") || prog.goal?.toLowerCase().includes("sèche") ? nutri.perteMG : nutri.maintien) : null;
 
   const generatePDF = () => {
+    const env = import.meta.env;
+    const coachFullName = env.VITE_COACH_FULLNAME || env.VITE_COACH_NAME || "Coach";
+    const coachTitle = env.VITE_COACH_TITLE || "Coach Personnel";
+    const coachCity = env.VITE_COACH_CITY || "";
+    const coachEmail = env.VITE_COACH_EMAIL || "";
+    const coachInsta = env.VITE_COACH_INSTAGRAM || "";
+    const slug = s => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const fileTitle = `Programme-${slug(client.firstName)}-${slug(client.lastName)}-${today()}`;
     const nutriBlock = nutri && calTarget ? `
 <div class="section-title">Bilan nutritionnel personnalisé</div>
 <div class="nutri-grid">
@@ -135,9 +143,12 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
   ${client.restrictions ? `<br>⚠️ ${client.restrictions}` : ""}
 </div>` : "";
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${fileTitle}</title><style>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'Montserrat',sans-serif;background:#fff;color:#111;padding:40px;}
+@page{size:A4;margin:12mm;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+body{font-family:'Montserrat','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;background:#fff;color:#111;padding:40px;}
 .header{background:#111;color:#fff;padding:32px 40px;margin:-40px -40px 32px;display:flex;justify-content:space-between;align-items:center;}
 .logo{font-size:28px;font-weight:900;letter-spacing:0.06em;}.logo span{color:#C9A84C;}
 .header-right{text-align:right;color:#999;font-size:12px;line-height:1.8;}
@@ -159,7 +170,7 @@ td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}tr:nth-
 .footer-logo{font-weight:900;font-size:16px;letter-spacing:0.06em;}.footer-logo span{color:#C9A84C;}
 .footer-right{font-size:11px;color:#aaa;text-align:right;line-height:1.7;}
 </style></head><body>
-<div class="header"><div class="logo">JELI<span>TRAINING</span></div><div class="header-right">Coach Personnel · ${import.meta.env.VITE_COACH_CITY}<br>${import.meta.env.VITE_COACH_EMAIL}<br>${import.meta.env.VITE_COACH_INSTAGRAM}</div></div>
+<div class="header"><div class="logo">JELI<span>TRAINING</span></div><div class="header-right">${coachTitle}${coachCity ? ` · ${coachCity}` : ""}<br>${coachEmail}<br>${coachInsta}</div></div>
 <div class="title">${prog.title}</div>
 <div class="subtitle">Client : ${client.firstName} ${client.lastName}${client.weight ? ` · ${client.weight}kg` : ""} · Généré le ${fdate(today())}</div>
 <div class="meta">
@@ -174,12 +185,17 @@ ${nutriBlock}
 <table><thead><tr><th>#</th><th>Exercice</th><th>Séries</th><th>Répétitions</th><th>Repos</th><th>Notes coach</th></tr></thead>
 <tbody>${prog.exercises.map((ex, i) => `<tr><td class="num">${i + 1}</td><td><b>${ex.name || "—"}</b></td><td>${ex.sets}</td><td>${ex.reps}</td><td>${ex.rest}s</td><td style="color:#888">${ex.notes || "—"}</td></tr>`).join("")}</tbody></table>
 <div class="section-title">Retour au calme</div><div class="info-box">${prog.cooldown}</div>
-<div class="footer"><div class="footer-logo">JELI<span>TRAINING</span></div><div class="footer-right">${import.meta.env.VITE_COACH_FULLNAME} · ${import.meta.env.VITE_COACH_TITLE}<br>${import.meta.env.VITE_COACH_EMAIL} · ${import.meta.env.VITE_COACH_INSTAGRAM}</div></div>
+<div class="footer"><div class="footer-logo">JELI<span>TRAINING</span></div><div class="footer-right">${coachFullName} · ${coachTitle}<br>${coachEmail}${coachInsta ? ` · ${coachInsta}` : ""}</div></div>
 </body></html>`;
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
-    setTimeout(() => win.print(), 700);
+    win.document.title = fileTitle;
+    setTimeout(() => {
+      win.document.title = fileTitle;
+      win.focus();
+      win.print();
+    }, 700);
   };
 
   return (

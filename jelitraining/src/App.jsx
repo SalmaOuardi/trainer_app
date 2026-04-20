@@ -191,7 +191,7 @@ export default function App() {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700&display=swap');
       `}</style>
 
-      <div className="mobile-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", background: C.s1, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 200, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+      <div className="mobile-topbar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "calc(env(safe-area-inset-top, 0px) + 14px) 18px 14px", background: C.s1, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 200, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.2))`, border: `1.5px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: C.shadowGold }}>
             <span style={{ color: C.gold, fontSize: 11, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
@@ -212,7 +212,7 @@ export default function App() {
 
       {sideOpen && <div onClick={closeNav} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 300, animation: "fadeIn 0.15s ease" }}>
         <div onClick={e => e.stopPropagation()} style={{ width: 260, height: "100%", background: C.s1, borderRight: `1px solid ${C.goldBorder}`, display: "flex", flexDirection: "column", boxShadow: "4px 0 20px rgba(0,0,0,0.5)" }}>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 14px" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "calc(env(safe-area-inset-top, 0px) + 12px) 14px 12px" }}>
             <button onClick={closeNav} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
           </div>
           <SidebarContent onNav={closeNav} />

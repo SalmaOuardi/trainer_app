@@ -144,40 +144,41 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
   ${client.restrictions ? `<br><b>Restrictions :</b> ${client.restrictions}` : ""}
 </div>` : "";
 
-    const body = `
-<style>
-#pdf-render{font-family:'Montserrat',Helvetica,Arial,sans-serif;background:#fff;color:#111;width:800px;padding:40px;box-sizing:border-box;}
+    const css = `
+#pdf-render{font-family:Helvetica,Arial,sans-serif;background:#fff;color:#111;width:800px;padding:40px;box-sizing:border-box;}
 #pdf-render *{box-sizing:border-box;margin:0;padding:0;}
 #pdf-render .pdf-header{background:#111;color:#fff;padding:32px 40px;margin:-40px -40px 32px;display:flex;justify-content:space-between;align-items:center;}
 #pdf-render .pdf-logo{font-size:28px;font-weight:900;letter-spacing:0.06em;color:#fff;}
 #pdf-render .pdf-logo span{color:#C9A84C;}
-#pdf-render .pdf-header-right{text-align:right;color:#999;font-size:12px;line-height:1.8;}
-#pdf-render .pdf-title{font-size:22px;font-weight:900;margin-bottom:6px;}
+#pdf-render .pdf-header-right{text-align:right;color:#bbb;font-size:12px;line-height:1.8;}
+#pdf-render .pdf-title{font-size:22px;font-weight:900;margin-bottom:6px;color:#111;}
 #pdf-render .pdf-subtitle{color:#888;font-size:13px;margin-bottom:24px;}
 #pdf-render .pdf-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
-#pdf-render .pdf-badge{background:#f5f5f5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;}
+#pdf-render .pdf-badge{background:#f5f5f5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;color:#111;}
 #pdf-render .pdf-badge b{color:#C9A84C;}
 #pdf-render .pdf-section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#999;font-weight:700;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #C9A84C;}
 #pdf-render .pdf-info-box{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 16px;font-size:13px;color:#555;}
 #pdf-render .pdf-nutri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-top:8px;}
 #pdf-render .pdf-nutri-card{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 14px;}
 #pdf-render .pdf-nutri-main{background:#111;border-color:#C9A84C;}
-#pdf-render .pdf-nutri-main .pdf-nutri-label{color:#999;}
+#pdf-render .pdf-nutri-main .pdf-nutri-label{color:#bbb;}
 #pdf-render .pdf-nutri-main .pdf-nutri-val{color:#C9A84C;}
-#pdf-render .pdf-nutri-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;margin-bottom:6px;}
+#pdf-render .pdf-nutri-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#999;margin-bottom:6px;}
 #pdf-render .pdf-nutri-val{font-size:22px;font-weight:900;color:#111;}
 #pdf-render .pdf-nutri-val span{font-size:12px;font-weight:400;color:#aaa;}
 #pdf-render .pdf-nutri-macros{display:flex;gap:12px;margin-top:8px;font-size:12px;font-weight:700;}
 #pdf-render table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
 #pdf-render th{background:#111;color:#C9A84C;padding:10px 14px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}
-#pdf-render td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+#pdf-render td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;color:#111;}
 #pdf-render tr:nth-child(even) td{background:#fafafa;}
 #pdf-render .pdf-num{font-weight:700;color:#C9A84C;font-size:15px;}
 #pdf-render .pdf-footer{margin-top:40px;padding-top:16px;border-top:2px solid #C9A84C;display:flex;justify-content:space-between;align-items:center;}
-#pdf-render .pdf-footer-logo{font-weight:900;font-size:16px;letter-spacing:0.06em;}
+#pdf-render .pdf-footer-logo{font-weight:900;font-size:16px;letter-spacing:0.06em;color:#111;}
 #pdf-render .pdf-footer-logo span{color:#C9A84C;}
-#pdf-render .pdf-footer-right{font-size:11px;color:#aaa;text-align:right;line-height:1.7;}
-</style>
+#pdf-render .pdf-footer-right{font-size:11px;color:#888;text-align:right;line-height:1.7;}
+`;
+
+    const body = `
 <div class="pdf-header"><div class="pdf-logo">JELI<span>TRAINING</span></div><div class="pdf-header-right">${coachTitle}${coachCity ? ` · ${coachCity}` : ""}<br>${coachEmail}<br>${coachInsta}</div></div>
 <div class="pdf-title">${prog.title}</div>
 <div class="pdf-subtitle">Client : ${client.firstName} ${client.lastName}${client.weight ? ` · ${client.weight}kg` : ""} · Généré le ${fdate(today())}</div>
@@ -196,42 +197,52 @@ ${nutriBlock}
 <div class="pdf-footer"><div class="pdf-footer-logo">JELI<span>TRAINING</span></div><div class="pdf-footer-right">${coachFullName} · ${coachTitle}<br>${coachEmail}${coachInsta ? ` · ${coachInsta}` : ""}</div></div>
 `;
 
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const previewWin = isMobile ? window.open("", "_blank") : null;
+    if (previewWin) previewWin.document.write("<title>Génération du PDF…</title><body style='font-family:system-ui;padding:40px;color:#666;text-align:center;'>Génération du PDF…</body>");
+
+    const styleEl = document.createElement("style");
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+
     const container = document.createElement("div");
     container.id = "pdf-render";
-    container.style.cssText = "position:fixed;left:-10000px;top:0;";
+    container.style.cssText = "position:absolute;left:-10000px;top:0;width:800px;";
     container.innerHTML = body;
     document.body.appendChild(container);
 
     try {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       const { default: html2pdf } = await import("html2pdf.js");
       const blob = await html2pdf().from(container).set({
         margin: 0,
         filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 800, width: 800 },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
       }).outputPdf("blob");
 
-      const file = new File([blob], filename, { type: "application/pdf" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: prog.title, text: `Programme — ${client.firstName} ${client.lastName}` });
-          return;
-        } catch (err) {
-          if (err.name === "AbortError") return;
-        }
-      }
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      if (previewWin) {
+        previewWin.location.href = url;
+      } else {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (err) {
+      if (previewWin) previewWin.close();
+      alert("Erreur lors de la génération du PDF — réessayez.");
+      console.error(err);
     } finally {
       document.body.removeChild(container);
+      document.head.removeChild(styleEl);
     }
   };
 

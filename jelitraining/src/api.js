@@ -11,12 +11,15 @@ const CLIENT_PREFIX = "jeli-client-";
 
 const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 
-// Fetch all clients (per-row model)
+// Fetch all clients (per-row model).
+// Returns an array (possibly empty) on success, or null on network/server failure.
+// Callers must treat [] as "server has no clients" and null as "unknown, use cache".
 export const sbGetAll = async () => {
   try {
     const r = await fetch(`${SB_URL}/rest/v1/store?key=like.${CLIENT_PREFIX}%25&select=value`, { headers });
+    if (!r.ok) return null;
     const data = await r.json();
-    if (!Array.isArray(data) || data.length === 0) return null;
+    if (!Array.isArray(data)) return null;
     return data.map(row => JSON.parse(row.value));
   } catch { return null; }
 };

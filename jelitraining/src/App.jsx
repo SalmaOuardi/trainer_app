@@ -25,24 +25,33 @@ export default function App() {
   useEffect(() => {
     if (!authed) return;
     (async () => {
-      let remote = await sbGetAll();
+      const remote = await sbGetAll();
+
+      // Network/server failure: fall back to cached data so the app is usable offline.
       if (remote === null) {
-        // One-time migration from legacy single-blob format
+        const local = loadFromStorage();
+        if (local) setClients(local);
+        setLoading(false);
+        return;
+      }
+
+      // Server reachable and empty: run one-time legacy migration if applicable.
+      if (remote.length === 0) {
         const legacy = await sbGetLegacy();
         if (legacy && Array.isArray(legacy) && legacy.length > 0) {
           await Promise.all(legacy.map(c => sbSaveClient(c)));
           await sbDeleteLegacy();
-          remote = legacy;
+          setClients(legacy);
+          saveToStorage(legacy);
+          setLoading(false);
+          return;
         }
       }
-      if (remote && Array.isArray(remote)) {
-        setClients(remote);
-        saveToStorage(remote);
-        setLoading(false);
-        return;
-      }
-      const local = loadFromStorage();
-      if (local) setClients(local);
+
+      // Server is source of truth — overwrite state AND cache unconditionally,
+      // even when empty, so stale local data can never outlive a remote delete.
+      setClients(remote);
+      saveToStorage(remote);
       setLoading(false);
     })();
   }, [authed]);

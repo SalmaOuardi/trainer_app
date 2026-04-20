@@ -197,48 +197,52 @@ ${nutriBlock}
 <div class="pdf-footer"><div class="pdf-footer-logo">JELI<span>TRAINING</span></div><div class="pdf-footer-right">${coachFullName} · ${coachTitle}<br>${coachEmail}${coachInsta ? ` · ${coachInsta}` : ""}</div></div>
 `;
 
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const previewWin = isMobile ? window.open("", "_blank") : null;
-    if (previewWin) previewWin.document.write("<title>Génération du PDF…</title><body style='font-family:system-ui;padding:40px;color:#666;text-align:center;'>Génération du PDF…</body>");
-
     const styleEl = document.createElement("style");
     styleEl.textContent = css;
     document.head.appendChild(styleEl);
 
     const container = document.createElement("div");
     container.id = "pdf-render";
-    container.style.cssText = "position:absolute;left:-10000px;top:0;width:800px;";
+    container.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-1;";
     container.innerHTML = body;
     document.body.appendChild(container);
 
     try {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await new Promise(r => setTimeout(r, 150));
       const { default: html2pdf } = await import("html2pdf.js");
       const blob = await html2pdf().from(container).set({
         margin: 0,
         filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 800, width: 800 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: 800,
+          onclone: (doc) => {
+            const s = doc.createElement("style");
+            s.textContent = css;
+            doc.head.appendChild(s);
+            const el = doc.getElementById("pdf-render");
+            if (el) el.style.cssText = "position:static;opacity:1;";
+          },
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-      }).outputPdf("blob");
+      }).output("blob");
 
       const url = URL.createObjectURL(blob);
-      if (previewWin) {
-        previewWin.location.href = url;
-      } else {
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (err) {
-      if (previewWin) previewWin.close();
-      alert("Erreur lors de la génération du PDF — réessayez.");
+      alert("Erreur PDF : " + (err && err.message ? err.message : err));
       console.error(err);
     } finally {
       document.body.removeChild(container);

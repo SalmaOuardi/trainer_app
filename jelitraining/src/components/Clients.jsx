@@ -9,8 +9,8 @@ export function ClientsView({ clients, search, onSearch, onSelect, onAdd }) {
     : clients;
 
   return (
-    <div style={{ padding: "40px 44px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, animation: "fadeIn 0.3s ease" }}>
+    <div className="page" style={{ padding: "40px 44px" }}>
+      <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, animation: "fadeIn 0.3s ease", gap: 12, flexWrap: "wrap" }}>
         <div>
           <h1 style={{ color: C.text, fontSize: 24, fontWeight: 700, margin: 0, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>
             Mes <span style={{ color: C.gold }}>Clients</span>
@@ -28,7 +28,7 @@ export function ClientsView({ clients, search, onSearch, onSelect, onAdd }) {
               const actif = (c.status || "actif") === "actif";
               const hasPending = (c.payments || []).some(p => p.status === "en attente");
               return (
-                <div key={c.id} onClick={() => onSelect(c.id)}
+                <div key={c.id} onClick={() => onSelect(c.id)} className="client-row"
                   style={{ background: C.s1, border: `1px solid ${hasPending ? C.orange + "55" : C.border}`, borderRadius: 14, padding: "16px 22px", display: "flex", alignItems: "center", gap: 18, cursor: "pointer", transition: "all 0.2s ease", boxShadow: "none", animation: "slideUp 0.35s ease both", animationDelay: `${idx * 40}ms` }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldBorder; e.currentTarget.style.background = C.s2; e.currentTarget.style.boxShadow = C.shadow2; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = hasPending ? C.orange + "55" : C.border; e.currentTarget.style.background = C.s1; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
@@ -40,9 +40,9 @@ export function ClientsView({ clients, search, onSearch, onSelect, onAdd }) {
                     <div style={{ color: C.text, fontWeight: 600, fontSize: 15 }}>{c.firstName} {c.lastName}</div>
                     <div style={{ color: C.muted, fontSize: 12, marginTop: 3 }}>{c.email || c.phone || "—"}{c.goal ? ` · ${c.goal}` : ""}</div>
                   </div>
-                  <div style={{ display: "flex", gap: 18, alignItems: "center", flexShrink: 0 }}>
-                    <div style={{ textAlign: "center" }}><div style={{ color: C.text, fontWeight: 700, fontSize: 16 }}>{(c.sessions || []).length}</div><div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>séances</div></div>
-                    <div style={{ textAlign: "center" }}><div style={{ color: C.green, fontWeight: 700, fontSize: 16 }}>{fmoney(paid)}</div><div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>encaissé</div></div>
+                  <div className="client-row-stats" style={{ display: "flex", gap: 18, alignItems: "center", flexShrink: 0 }}>
+                    <div style={{ textAlign: "center" }}><div className="stat-num" style={{ color: C.text, fontWeight: 700, fontSize: 16 }}>{(c.sessions || []).length}</div><div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>séances</div></div>
+                    <div style={{ textAlign: "center" }}><div className="stat-num" style={{ color: C.green, fontWeight: 700, fontSize: 16 }}>{fmoney(paid)}</div><div style={{ color: C.muted, fontSize: 11, marginTop: 2 }}>encaissé</div></div>
                     {hasPending && <Tag color={C.orange}>Impayé</Tag>}
                     <Tag color={actif ? C.green : C.muted}>{actif ? "Actif" : "Inactif"}</Tag>
                   </div>

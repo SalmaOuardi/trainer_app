@@ -117,7 +117,7 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
   const nutri = calcNutrition(client);
   const calTarget = nutri ? (prog.goal?.toLowerCase().includes("masse") ? nutri.priseMasse : prog.goal?.toLowerCase().includes("perte") || prog.goal?.toLowerCase().includes("sèche") ? nutri.perteMG : nutri.maintien) : null;
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const env = import.meta.env;
     const coachFullName = env.VITE_COACH_FULLNAME || env.VITE_COACH_NAME || "Coach";
     const coachTitle = env.VITE_COACH_TITLE || "Coach Personnel";
@@ -125,77 +125,114 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
     const coachEmail = env.VITE_COACH_EMAIL || "";
     const coachInsta = env.VITE_COACH_INSTAGRAM || "";
     const slug = s => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const fileTitle = `Programme-${slug(client.firstName)}-${slug(client.lastName)}-${today()}`;
+    const filename = `Programme-${slug(client.firstName)}-${slug(client.lastName)}-${today()}.pdf`;
+
     const nutriBlock = nutri && calTarget ? `
-<div class="section-title">Bilan nutritionnel personnalisé</div>
-<div class="nutri-grid">
-  <div class="nutri-card nutri-main">
-    <div class="nutri-label">Objectif calorique (${prog.goal || "maintien"})</div>
-    <div class="nutri-val">${calTarget.cal} <span>kcal/jour</span></div>
-    <div class="nutri-macros"><span style="color:#5aaccc">P : ${calTarget.prot}g</span><span style="color:#C9A84C">L : ${calTarget.lip}g</span><span style="color:#9a77cc">G : ${calTarget.gluc}g</span></div>
+<div class="pdf-section-title">Bilan nutritionnel personnalisé</div>
+<div class="pdf-nutri-grid">
+  <div class="pdf-nutri-card pdf-nutri-main">
+    <div class="pdf-nutri-label">Objectif calorique (${prog.goal || "maintien"})</div>
+    <div class="pdf-nutri-val">${calTarget.cal} <span>kcal/jour</span></div>
+    <div class="pdf-nutri-macros"><span style="color:#5aaccc">P : ${calTarget.prot}g</span><span style="color:#C9A84C">L : ${calTarget.lip}g</span><span style="color:#9a77cc">G : ${calTarget.gluc}g</span></div>
   </div>
-  <div class="nutri-card"><div class="nutri-label">⚖️ Maintien</div><div class="nutri-val">${nutri.maintien.cal} <span>kcal</span></div></div>
-  <div class="nutri-card"><div class="nutri-label">🔥 Perte MG</div><div class="nutri-val">${nutri.perteMG.cal} <span>kcal</span></div></div>
-  <div class="nutri-card"><div class="nutri-label">💪 Prise masse</div><div class="nutri-val">${nutri.priseMasse.cal} <span>kcal</span></div></div>
+  <div class="pdf-nutri-card"><div class="pdf-nutri-label">Maintien</div><div class="pdf-nutri-val">${nutri.maintien.cal} <span>kcal</span></div></div>
+  <div class="pdf-nutri-card"><div class="pdf-nutri-label">Perte MG</div><div class="pdf-nutri-val">${nutri.perteMG.cal} <span>kcal</span></div></div>
+  <div class="pdf-nutri-card"><div class="pdf-nutri-label">Prise masse</div><div class="pdf-nutri-val">${nutri.priseMasse.cal} <span>kcal</span></div></div>
 </div>
-<div class="info-box" style="margin-top:10px;font-size:12px;">
-  🥩 Protéines : ${Math.round((client.weight || 0) * 2)}g/jour · 💧 Eau : ${((client.weight || 0) * 0.035).toFixed(1)}L/jour · 🍽️ ${client.mealsPerDay || 3} repas : ~${Math.round(calTarget.cal / (client.mealsPerDay || 3))} kcal/repas
-  ${client.restrictions ? `<br>⚠️ ${client.restrictions}` : ""}
+<div class="pdf-info-box" style="margin-top:10px;font-size:12px;">
+  <b>Protéines :</b> ${Math.round((client.weight || 0) * 2)}g/jour &nbsp;·&nbsp; <b>Eau :</b> ${((client.weight || 0) * 0.035).toFixed(1)}L/jour &nbsp;·&nbsp; <b>${client.mealsPerDay || 3} repas :</b> ~${Math.round(calTarget.cal / (client.mealsPerDay || 3))} kcal/repas
+  ${client.restrictions ? `<br><b>Restrictions :</b> ${client.restrictions}` : ""}
 </div>` : "";
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${fileTitle}</title><style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap');
-@page{size:A4;margin:12mm;}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;}
-html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-body{font-family:'Montserrat','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;background:#fff;color:#111;padding:40px;}
-.header{background:#111;color:#fff;padding:32px 40px;margin:-40px -40px 32px;display:flex;justify-content:space-between;align-items:center;}
-.logo{font-size:28px;font-weight:900;letter-spacing:0.06em;}.logo span{color:#C9A84C;}
-.header-right{text-align:right;color:#999;font-size:12px;line-height:1.8;}
-.title{font-size:22px;font-weight:900;margin-bottom:6px;}.subtitle{color:#888;font-size:13px;margin-bottom:24px;}
-.meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}.badge{background:#f5f5f5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;}.badge b{color:#C9A84C;}
-.section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#999;font-weight:700;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #C9A84C;}
-.info-box{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 16px;font-size:13px;color:#555;}
-.nutri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-top:8px;}
-.nutri-card{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 14px;}
-.nutri-main{background:#111;border-color:#C9A84C;}.nutri-main .nutri-label{color:#999;}.nutri-main .nutri-val{color:#C9A84C;}
-.nutri-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;margin-bottom:6px;}
-.nutri-val{font-size:22px;font-weight:900;color:#111;}.nutri-val span{font-size:12px;font-weight:400;color:#aaa;}
-.nutri-macros{display:flex;gap:12px;margin-top:8px;font-size:12px;font-weight:700;}
-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
-th{background:#111;color:#C9A84C;padding:10px 14px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}
-td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}tr:nth-child(even) td{background:#fafafa;}
-.num{font-weight:700;color:#C9A84C;font-size:15px;}
-.footer{margin-top:40px;padding-top:16px;border-top:2px solid #C9A84C;display:flex;justify-content:space-between;align-items:center;}
-.footer-logo{font-weight:900;font-size:16px;letter-spacing:0.06em;}.footer-logo span{color:#C9A84C;}
-.footer-right{font-size:11px;color:#aaa;text-align:right;line-height:1.7;}
-</style></head><body>
-<div class="header"><div class="logo">JELI<span>TRAINING</span></div><div class="header-right">${coachTitle}${coachCity ? ` · ${coachCity}` : ""}<br>${coachEmail}<br>${coachInsta}</div></div>
-<div class="title">${prog.title}</div>
-<div class="subtitle">Client : ${client.firstName} ${client.lastName}${client.weight ? ` · ${client.weight}kg` : ""} · Généré le ${fdate(today())}</div>
-<div class="meta">
-  <div class="badge">Durée : <b>${prog.duration} semaines</b></div>
-  <div class="badge">Fréquence : <b>${prog.days} jours / semaine</b></div>
-  <div class="badge">Niveau : <b>${prog.level}</b></div>
-  ${prog.goal ? `<div class="badge">Objectif : <b>${prog.goal}</b></div>` : ""}
+    const body = `
+<style>
+#pdf-render{font-family:'Montserrat',Helvetica,Arial,sans-serif;background:#fff;color:#111;width:800px;padding:40px;box-sizing:border-box;}
+#pdf-render *{box-sizing:border-box;margin:0;padding:0;}
+#pdf-render .pdf-header{background:#111;color:#fff;padding:32px 40px;margin:-40px -40px 32px;display:flex;justify-content:space-between;align-items:center;}
+#pdf-render .pdf-logo{font-size:28px;font-weight:900;letter-spacing:0.06em;color:#fff;}
+#pdf-render .pdf-logo span{color:#C9A84C;}
+#pdf-render .pdf-header-right{text-align:right;color:#999;font-size:12px;line-height:1.8;}
+#pdf-render .pdf-title{font-size:22px;font-weight:900;margin-bottom:6px;}
+#pdf-render .pdf-subtitle{color:#888;font-size:13px;margin-bottom:24px;}
+#pdf-render .pdf-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;}
+#pdf-render .pdf-badge{background:#f5f5f5;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;}
+#pdf-render .pdf-badge b{color:#C9A84C;}
+#pdf-render .pdf-section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#999;font-weight:700;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #C9A84C;}
+#pdf-render .pdf-info-box{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 16px;font-size:13px;color:#555;}
+#pdf-render .pdf-nutri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-top:8px;}
+#pdf-render .pdf-nutri-card{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:12px 14px;}
+#pdf-render .pdf-nutri-main{background:#111;border-color:#C9A84C;}
+#pdf-render .pdf-nutri-main .pdf-nutri-label{color:#999;}
+#pdf-render .pdf-nutri-main .pdf-nutri-val{color:#C9A84C;}
+#pdf-render .pdf-nutri-label{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;margin-bottom:6px;}
+#pdf-render .pdf-nutri-val{font-size:22px;font-weight:900;color:#111;}
+#pdf-render .pdf-nutri-val span{font-size:12px;font-weight:400;color:#aaa;}
+#pdf-render .pdf-nutri-macros{display:flex;gap:12px;margin-top:8px;font-size:12px;font-weight:700;}
+#pdf-render table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+#pdf-render th{background:#111;color:#C9A84C;padding:10px 14px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;}
+#pdf-render td{padding:10px 14px;border-bottom:1px solid #f0f0f0;vertical-align:top;}
+#pdf-render tr:nth-child(even) td{background:#fafafa;}
+#pdf-render .pdf-num{font-weight:700;color:#C9A84C;font-size:15px;}
+#pdf-render .pdf-footer{margin-top:40px;padding-top:16px;border-top:2px solid #C9A84C;display:flex;justify-content:space-between;align-items:center;}
+#pdf-render .pdf-footer-logo{font-weight:900;font-size:16px;letter-spacing:0.06em;}
+#pdf-render .pdf-footer-logo span{color:#C9A84C;}
+#pdf-render .pdf-footer-right{font-size:11px;color:#aaa;text-align:right;line-height:1.7;}
+</style>
+<div class="pdf-header"><div class="pdf-logo">JELI<span>TRAINING</span></div><div class="pdf-header-right">${coachTitle}${coachCity ? ` · ${coachCity}` : ""}<br>${coachEmail}<br>${coachInsta}</div></div>
+<div class="pdf-title">${prog.title}</div>
+<div class="pdf-subtitle">Client : ${client.firstName} ${client.lastName}${client.weight ? ` · ${client.weight}kg` : ""} · Généré le ${fdate(today())}</div>
+<div class="pdf-meta">
+  <div class="pdf-badge">Durée : <b>${prog.duration} semaines</b></div>
+  <div class="pdf-badge">Fréquence : <b>${prog.days} jours / semaine</b></div>
+  <div class="pdf-badge">Niveau : <b>${prog.level}</b></div>
+  ${prog.goal ? `<div class="pdf-badge">Objectif : <b>${prog.goal}</b></div>` : ""}
 </div>
 ${nutriBlock}
-<div class="section-title">Échauffement</div><div class="info-box">${prog.warmup}</div>
-<div class="section-title">Programme d'exercices</div>
+<div class="pdf-section-title">Échauffement</div><div class="pdf-info-box">${prog.warmup}</div>
+<div class="pdf-section-title">Programme d'exercices</div>
 <table><thead><tr><th>#</th><th>Exercice</th><th>Séries</th><th>Répétitions</th><th>Repos</th><th>Notes coach</th></tr></thead>
-<tbody>${prog.exercises.map((ex, i) => `<tr><td class="num">${i + 1}</td><td><b>${ex.name || "—"}</b></td><td>${ex.sets}</td><td>${ex.reps}</td><td>${ex.rest}s</td><td style="color:#888">${ex.notes || "—"}</td></tr>`).join("")}</tbody></table>
-<div class="section-title">Retour au calme</div><div class="info-box">${prog.cooldown}</div>
-<div class="footer"><div class="footer-logo">JELI<span>TRAINING</span></div><div class="footer-right">${coachFullName} · ${coachTitle}<br>${coachEmail}${coachInsta ? ` · ${coachInsta}` : ""}</div></div>
-</body></html>`;
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    win.document.title = fileTitle;
-    setTimeout(() => {
-      win.document.title = fileTitle;
-      win.focus();
-      win.print();
-    }, 700);
+<tbody>${prog.exercises.map((ex, i) => `<tr><td class="pdf-num">${i + 1}</td><td><b>${ex.name || "—"}</b></td><td>${ex.sets}</td><td>${ex.reps}</td><td>${ex.rest}s</td><td style="color:#888">${ex.notes || "—"}</td></tr>`).join("")}</tbody></table>
+<div class="pdf-section-title">Retour au calme</div><div class="pdf-info-box">${prog.cooldown}</div>
+<div class="pdf-footer"><div class="pdf-footer-logo">JELI<span>TRAINING</span></div><div class="pdf-footer-right">${coachFullName} · ${coachTitle}<br>${coachEmail}${coachInsta ? ` · ${coachInsta}` : ""}</div></div>
+`;
+
+    const container = document.createElement("div");
+    container.id = "pdf-render";
+    container.style.cssText = "position:fixed;left:-10000px;top:0;";
+    container.innerHTML = body;
+    document.body.appendChild(container);
+
+    try {
+      const { default: html2pdf } = await import("html2pdf.js");
+      const blob = await html2pdf().from(container).set({
+        margin: 0,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      }).outputPdf("blob");
+
+      const file = new File([blob], filename, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: prog.title, text: `Programme — ${client.firstName} ${client.lastName}` });
+          return;
+        } catch (err) {
+          if (err.name === "AbortError") return;
+        }
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } finally {
+      document.body.removeChild(container);
+    }
   };
 
   return (
@@ -204,7 +241,7 @@ ${nutriBlock}
         <h3 style={{ color: C.text, fontSize: 15, fontWeight: 600, margin: 0 }}>Générateur de programme</h3>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Btn variant="ghost" onClick={() => { if (onSave) onSave({ ...prog, savedAt: today(), source: "manuel" }); alert("Programme sauvegardé dans la fiche client ✓"); }}>💾 Sauvegarder</Btn>
-          <Btn onClick={generatePDF}>🖨 Générer PDF</Btn>
+          <Btn onClick={generatePDF}>📄 Générer PDF</Btn>
         </div>
       </div>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>

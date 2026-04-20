@@ -14,7 +14,7 @@ const headers = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 // Fetch all clients (per-row model)
 export const sbGetAll = async () => {
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/store?key=like.${CLIENT_PREFIX}%&select=value`, { headers });
+    const r = await fetch(`${SB_URL}/rest/v1/store?key=like.${CLIENT_PREFIX}%25&select=value`, { headers });
     const data = await r.json();
     if (!Array.isArray(data) || data.length === 0) return null;
     return data.map(row => JSON.parse(row.value));

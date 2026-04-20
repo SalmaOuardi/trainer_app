@@ -55,14 +55,14 @@ export function Modal({ title, onClose, children, width = 520 }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, animation: "fadeIn 0.2s ease" }}>
       <div style={{ background: C.s2, border: `1px solid ${C.goldBorder}`, borderRadius: 16, width: "100%", maxWidth: width, maxHeight: "90vh", overflowY: "auto", boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.1)`, animation: "fadeInScale 0.25s ease" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: `1px solid ${C.border}` }}>
+        <div className="modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: `1px solid ${C.border}` }}>
           <span style={{ color: C.gold, fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", textTransform: "uppercase" }}>{title}</span>
           <button onClick={onClose}
             onMouseEnter={e => { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; }}
             style={{ background: "transparent", border: "none", color: C.muted, fontSize: 20, cursor: "pointer", lineHeight: 1, padding: "4px 8px", borderRadius: 8, transition: "all 0.15s" }}>×</button>
         </div>
-        <div style={{ padding: "24px 24px 28px" }}>{children}</div>
+        <div className="modal-body" style={{ padding: "24px 24px 28px" }}>{children}</div>
       </div>
     </div>
   );

@@ -191,7 +191,7 @@ ${nutriBlock}
           <Btn onClick={generatePDF}>🖨 Générer PDF</Btn>
         </div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Titre du programme"><Input value={prog.title} onChange={setP("title")} /></Field>
         <Field label="Objectif"><Input value={prog.goal} onChange={setP("goal")} placeholder="Ex : Prise de masse" /></Field>
         <Field label="Durée (semaines)"><Input type="number" value={prog.duration} onChange={setP("duration")} /></Field>
@@ -210,7 +210,7 @@ ${nutriBlock}
               <span style={{ color: C.gold, fontWeight: 700, fontSize: 12 }}>Exercice #{i + 1}</span>
               {prog.exercises.length > 1 && <button onClick={() => removeEx(ex.id)} style={{ background: "none", border: "none", color: C.red, cursor: "pointer", opacity: 0.6, fontSize: 12, fontFamily: "inherit" }}>✕ Retirer</button>}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "0 10px" }}>
+            <div className="grid-ex" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: "0 10px" }}>
               <Field label="Exercice"><Input value={ex.name} onChange={setEx(ex.id, "name")} placeholder="Ex : Squat barre" /></Field>
               <Field label="Séries"><Input type="number" value={ex.sets} onChange={setEx(ex.id, "sets")} /></Field>
               <Field label="Reps"><Input value={ex.reps} onChange={setEx(ex.id, "reps")} placeholder="10" /></Field>
@@ -328,7 +328,7 @@ function AddPackModal({ onClose, onSave }) {
         ))}
       </div>
       <Field label="Nom du pack *"><Input value={f.name} onChange={set("name")} /></Field>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Nb de séances *"><Input type="number" min="1" value={f.totalSessions} onChange={set("totalSessions")} /></Field>
         <Field label="Prix payé (€)"><Input type="number" min="0" value={f.price} onChange={set("price")} /></Field>
         <Field label="Date d'achat *"><Input type="date" value={f.startDate} onChange={set("startDate")} /></Field>
@@ -361,7 +361,7 @@ function RelanceModal({ client, pendingPayments, onClose }) {
       <Field label="Message (modifiable avant envoi)">
         <Textarea value={msg} onChange={e => setMsg(e.target.value)} rows={11} style={{ fontSize: 13, lineHeight: 1.65 }} />
       </Field>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 8 }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 8 }}>
         {client.phone && <a href={`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
           <button style={{ width: "100%", padding: "11px 0", borderRadius: 8, background: "#25D366", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>📱 WhatsApp</button>
         </a>}
@@ -385,7 +385,7 @@ export function ClientFormModal({ title, initial, onClose, onSave }) {
   return (
     <Modal title={title} onClose={onClose} width={600}>
       <div style={{ color: C.gold, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>◈ Identité & contact</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Prénom *"><Input value={f.firstName || ""} onChange={set("firstName")} placeholder="Prénom" /></Field>
         <Field label="Nom *"><Input value={f.lastName || ""} onChange={set("lastName")} placeholder="Nom" /></Field>
         <Field label="Email"><Input type="email" value={f.email || ""} onChange={set("email")} placeholder="email@example.com" /></Field>
@@ -396,7 +396,7 @@ export function ClientFormModal({ title, initial, onClose, onSave }) {
       <Field label="Objectif principal"><Input value={f.goal || ""} onChange={set("goal")} placeholder="Prise de masse, perte de poids…" /></Field>
       <div style={{ borderTop: `1px solid ${C.border}`, margin: "18px 0 16px" }} />
       <div style={{ color: C.gold, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>◈ Données physiques & nutritionnelles</div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 14px" }}>
+      <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 14px" }}>
         <Field label="Sexe"><Sel value={f.sexe || "homme"} onChange={set("sexe")}><option value="homme">Homme</option><option value="femme">Femme</option></Sel></Field>
         <Field label="Âge (ans)"><Input type="number" value={f.age || ""} onChange={set("age")} placeholder="25" /></Field>
         <Field label="Poids (kg)"><Input type="number" step="0.1" value={f.weight || ""} onChange={set("weight")} placeholder="75" /></Field>
@@ -444,7 +444,7 @@ function AddSessionModal({ onClose, onSave }) {
   return (
     <Modal title="✦ AJOUTER UNE SÉANCE" onClose={onClose}>
       <Field label="Date *"><Input type="date" value={f.date} onChange={set("date")} /></Field>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Type"><Sel value={f.type} onChange={set("type")}>{["Muscu", "Cardio", "Stretching", "HIIT", "Circuit", "Autre"].map(t => <option key={t}>{t}</option>)}</Sel></Field>
         <Field label="Durée (min) *"><Input type="number" min="1" value={f.duration} onChange={set("duration")} /></Field>
       </div>
@@ -471,7 +471,7 @@ function AddMeasurementModal({ onClose, onSave }) {
   return (
     <Modal title="✦ MENSURATIONS" onClose={onClose}>
       <Field label="Date *"><Input type="date" value={f.date} onChange={set("date")} /></Field>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Poids (kg)"><Input type="number" step="0.1" value={f.weight} onChange={set("weight")} placeholder="75.5" /></Field>
         <Field label="Poitrine (cm)"><Input type="number" step="0.5" value={f.chest} onChange={set("chest")} placeholder="95" /></Field>
         <Field label="Tour de taille (cm)"><Input type="number" step="0.5" value={f.waist} onChange={set("waist")} placeholder="80" /></Field>
@@ -523,7 +523,7 @@ function AddPaymentModal({ onClose, onSave }) {
     <Modal title="✦ AJOUTER UN PAIEMENT" onClose={onClose}>
       <Field label="Date *"><Input type="date" value={f.date} onChange={set("date")} /></Field>
       <Field label="Description"><Input value={f.description} onChange={set("description")} placeholder="Séance du 15 mars, Pack 10 séances…" /></Field>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
         <Field label="Montant (€) *"><Input type="number" step="0.01" min="0.01" value={f.amount} onChange={set("amount")} placeholder="40.00" /></Field>
         <Field label="Statut"><Sel value={f.status} onChange={set("status")}><option value="payé">Payé ✓</option><option value="en attente">En attente</option></Sel></Field>
       </div>
@@ -564,19 +564,19 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
   return (
     <div>
       {relanceOpen && <RelanceModal client={client} pendingPayments={pendingPayments} onClose={() => setRelanceOpen(false)} />}
-      <div style={{ background: `linear-gradient(180deg, ${C.s1}, ${C.bg})`, borderBottom: `1px solid ${C.border}`, padding: "28px 44px" }}>
+      <div className="detail-header" style={{ background: `linear-gradient(180deg, ${C.s1}, ${C.bg})`, borderBottom: `1px solid ${C.border}`, padding: "28px 44px" }}>
         <button onClick={onBack}
           onMouseEnter={e => { e.currentTarget.style.color = C.gold; }}
           onMouseLeave={e => { e.currentTarget.style.color = C.muted; }}
           style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 13, marginBottom: 18, padding: 0, display: "flex", alignItems: "center", gap: 6, fontFamily: "inherit", transition: "color 0.15s" }}>← Retour à la liste</button>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap", animation: "fadeIn 0.3s ease" }}>
           <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
-            <div style={{ width: 62, height: 62, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.22))`, border: `2px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
+            <div className="detail-avatar" style={{ width: 62, height: 62, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.22))`, border: `2px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
               <span style={{ color: C.gold, fontWeight: 700, fontSize: 24, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{(client.firstName || "?")[0]}{(client.lastName || "")[0]}</span>
             </div>
             <div>
               <h2 style={{ color: C.text, fontSize: 22, fontWeight: 700, margin: "0 0 8px", fontFamily: "'Cormorant Garamond',Georgia,serif", letterSpacing: "-0.01em" }}>{client.firstName} {client.lastName}</h2>
-              <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <div className="detail-meta" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
                 {client.email && <span style={{ color: C.muted, fontSize: 12 }}>✉ {client.email}</span>}
                 {client.phone && <span style={{ color: C.muted, fontSize: 12 }}>📱 {client.phone}</span>}
                 {client.age && <span style={{ color: C.muted, fontSize: 12 }}>🎂 {client.age} ans</span>}
@@ -585,7 +585,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
               {client.goal && <div style={{ color: C.gold, fontSize: 12, marginTop: 7 }}>🎯 {client.goal}</div>}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, flexWrap: "wrap" }}>
+          <div className="detail-actions" style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, flexWrap: "wrap" }}>
             {pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>📩 Relance impayé</Btn>}
             <Sel value={client.status || "actif"} onChange={e => mutations.updateStatus(e.target.value)} style={{ width: "auto", padding: "7px 12px", fontSize: 12 }}>
               <option value="actif">Actif</option><option value="inactif">Inactif</option>
@@ -593,7 +593,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
             <Btn variant="danger" onClick={() => { if (window.confirm(`Supprimer ${client.firstName} ${client.lastName} ?`)) mutations.delete(); }}>Supprimer</Btn>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, flexWrap: "wrap" }}>
+        <div className="detail-stats" style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.border}`, flexWrap: "wrap" }}>
           <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.text }}>{sessions.length}</strong> séances</span>
           <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.green }}>{fmoney(totalPaid)}</strong> encaissé</span>
           {pendingAmt > 0 && <span style={{ color: C.muted, fontSize: 12 }}><strong style={{ color: C.orange }}>{fmoney(pendingAmt)}</strong> en attente</span>}
@@ -601,7 +601,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         </div>
       </div>
 
-      <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, background: C.s1, paddingLeft: 44, overflowX: "auto", gap: 2 }}>
+      <div className="tab-bar" style={{ display: "flex", borderBottom: `1px solid ${C.border}`, background: C.s1, paddingLeft: 44, overflowX: "auto", gap: 2 }}>
         {tabs.map(t => (
           <button key={t.id} onClick={() => onTab(t.id)}
             onMouseEnter={e => { if (tab !== t.id) e.currentTarget.style.color = C.text; }}
@@ -613,7 +613,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         ))}
       </div>
 
-      <div style={{ padding: "32px 44px" }}>
+      <div className="detail-content" style={{ padding: "32px 44px" }}>
         {tab === "sessions" && <TabSection title="Historique des séances" onAdd={handlers.addSession}>
           {sessions.length === 0 ? <Empty icon="🏋️" text="Aucune séance enregistrée" /> :
             [...sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).map(s => (

@@ -3,12 +3,12 @@ import { fdate, fmoney } from "../utils.js";
 
 function StatCard({ label, value, sub, accent, delay = 0 }) {
   return (
-    <div
+    <div className="stat-card"
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = accent ? C.shadowGold : C.shadow2; e.currentTarget.style.borderColor = accent ? C.gold : C.goldBorder; }}
       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = C.shadow1; e.currentTarget.style.borderColor = accent ? C.goldBorder : C.border; }}
       style={{ background: `linear-gradient(135deg, ${C.s1}, ${C.s2})`, border: `1px solid ${accent ? C.goldBorder : C.border}`, borderRadius: 14, padding: "20px 24px", transition: "all 0.25s ease", boxShadow: C.shadow1, animation: "slideUp 0.4s ease both", animationDelay: `${delay}ms` }}>
       <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 500 }}>{label}</div>
-      <div style={{ color: accent ? C.gold : C.text, fontSize: 30, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif", lineHeight: 1.1 }}>{value}</div>
+      <div className="stat-value" style={{ color: accent ? C.gold : C.text, fontSize: 30, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif", lineHeight: 1.1 }}>{value}</div>
       {sub && <div style={{ color: C.muted, fontSize: 12, marginTop: 8 }}>{sub}</div>}
     </div>
   );
@@ -24,8 +24,8 @@ export function DashboardView({ stats, clients, onSelectClient }) {
   const now = new Date();
 
   return (
-    <div style={{ padding: "40px 44px", maxWidth: 1100 }}>
-      <div style={{ marginBottom: 36, animation: "fadeIn 0.4s ease" }}>
+    <div className="page" style={{ padding: "40px 44px", maxWidth: 1100 }}>
+      <div className="page-header" style={{ marginBottom: 36, animation: "fadeIn 0.4s ease" }}>
         <h1 style={{ color: C.text, fontSize: 24, fontWeight: 700, margin: 0, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>
           Bonjour, <span style={{ color: C.gold }}>{import.meta.env.VITE_COACH_NAME}</span> 👋
         </h1>
@@ -33,13 +33,13 @@ export function DashboardView({ stats, clients, onSelectClient }) {
           {now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
         </p>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 36 }}>
+      <div className="grid-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 36 }}>
         <StatCard label="Clients actifs" value={stats.actifs} sub={`${stats.total} au total`} accent delay={0} />
         <StatCard label="Séances ce mois" value={stats.sessions} sub="toutes formules" delay={60} />
         <StatCard label="Revenus ce mois" value={fmoney(stats.revenue)} sub="paiements validés" delay={120} />
         <StatCard label="En attente" value={fmoney(stats.pending)} sub="à encaisser" accent delay={180} />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         {[
           {
             title: "SÉANCES RÉCENTES", data: allSessions, tab: "sessions",

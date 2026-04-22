@@ -8,6 +8,9 @@ import { LoginScreen, ChangePasswordModal } from "./components/Auth.jsx";
 import { DashboardView } from "./components/Dashboard.jsx";
 import { ClientsView } from "./components/Clients.jsx";
 import { AddClientModal, ClientDetailView } from "./components/ClientDetail.jsx";
+import { CalendarView } from "./components/Calendar.jsx";
+
+const CALENDAR_ENABLED = import.meta.env.VITE_CALENDAR_ENABLED === "true";
 
 export default function App() {
   const [authed, setAuthed] = useState(() => localStorage.getItem(AUTH_KEY) === "1");
@@ -133,7 +136,11 @@ export default function App() {
   const updateIn = (id, field, iid, u) => persist(clients.map(c => c.id === id ? { ...c, [field]: (c[field] || []).map(i => i.id === iid ? { ...i, ...u } : i) } : c));
   const goTo = (id, t = "sessions") => { setSelectedId(id); setTab(t); setView("detail"); };
 
-  const navItems = [{ id: "dashboard", icon: "◈", label: "Dashboard" }, { id: "clients", icon: "◉", label: "Mes clients" }];
+  const navItems = [
+    { id: "dashboard", icon: "◈", label: "Dashboard" },
+    { id: "clients", icon: "◉", label: "Mes clients" },
+    ...(CALENDAR_ENABLED ? [{ id: "calendar", icon: "◐", label: "Calendrier" }] : []),
+  ];
   const closeNav = () => setSideOpen(false);
 
   if (loading) return (
@@ -226,6 +233,7 @@ export default function App() {
         <main style={{ flex: 1, overflowY: "auto" }}>
           {view === "dashboard" && <DashboardView stats={stats} clients={clients} onSelectClient={goTo} />}
           {view === "clients" && <ClientsView clients={clients} search={search} onSearch={setSearch} onSelect={id => goTo(id)} onAdd={() => setModal("addClient")} />}
+          {view === "calendar" && CALENDAR_ENABLED && <CalendarView clients={clients} onSelectClient={id => goTo(id)} />}
           {view === "detail" && selected && <ClientDetailView
             client={selected} tab={tab} onTab={setTab} onBack={() => setView("clients")}
             handlers={{

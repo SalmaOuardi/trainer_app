@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { C } from "./theme.js";
-import { gid, today } from "./utils.js";
+import { gid } from "./utils.js";
 import { loadFromStorage, saveToStorage } from "./lib.js";
 import { sbGetAll, sbSaveClient, sbDeleteClient, sbGetLegacy, sbDeleteLegacy, AUTH_KEY } from "./api.js";
 import { SaveBadge } from "./components/ui.jsx";
@@ -82,40 +82,6 @@ export default function App() {
     });
   };
 
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify(clients, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `JeliTraining-clients-${today()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importData = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        try {
-          const data = JSON.parse(ev.target.result);
-          if (Array.isArray(data)) {
-            persist(data);
-            alert(`✅ ${data.length} client(s) importé(s) avec succès !`);
-          } else {
-            alert("❌ Fichier invalide — ce n'est pas un export JeliTraining.");
-          }
-        } catch { alert("❌ Erreur de lecture du fichier."); }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  };
-
   const selected = clients.find(c => c.id === selectedId);
   const now = new Date();
   const m = now.getMonth(), y = now.getFullYear();
@@ -186,8 +152,6 @@ export default function App() {
     </nav>
     <div style={{ padding: "14px 10px", borderTop: `1px solid ${C.border}` }}>
       {saveStatus !== "idle" && <div style={{ marginBottom: 10, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
-      <SideBtn onClick={exportData} icon="💾" label="Exporter mes données" />
-      <SideBtn onClick={importData} icon="📂" label="Importer des données" />
       <SideBtn onClick={() => setChangePwOpen(true)} icon="🔑" label="Changer le mot de passe" />
     </div>
   </>;
@@ -207,8 +171,6 @@ export default function App() {
           <SaveBadge status={saveStatus} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={exportData} title="Exporter" style={{ background: C.s3, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 10px", color: C.muted, fontSize: 13, cursor: "pointer" }}>💾</button>
-          <button onClick={importData} title="Importer" style={{ background: C.s3, border: `1px solid ${C.border}`, borderRadius: 8, padding: "7px 10px", color: C.muted, fontSize: 13, cursor: "pointer" }}>📂</button>
           <button onClick={() => setSideOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, display: "flex", flexDirection: "column", gap: 5 }}>
             <span style={{ display: "block", width: 22, height: 2, background: C.gold, borderRadius: 2 }} />
             <span style={{ display: "block", width: 22, height: 2, background: C.gold, borderRadius: 2 }} />

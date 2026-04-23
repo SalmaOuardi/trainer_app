@@ -195,7 +195,12 @@ export default function App() {
         <main style={{ flex: 1, overflowY: "auto" }}>
           {view === "dashboard" && <DashboardView stats={stats} clients={clients} onSelectClient={goTo} />}
           {view === "clients" && <ClientsView clients={clients} search={search} onSearch={setSearch} onSelect={id => goTo(id)} onAdd={() => setModal("addClient")} />}
-          {view === "calendar" && CALENDAR_ENABLED && <CalendarView clients={clients} onSelectClient={id => goTo(id)} />}
+          {view === "calendar" && CALENDAR_ENABLED && <CalendarView
+            clients={clients}
+            onCreateEvent={(clientId, s) => addTo(clientId, "sessions", s)}
+            onEditEvent={(clientId, sessionId, u) => updateIn(clientId, "sessions", sessionId, u)}
+            onDeleteEvent={(clientId, sessionId) => removeFrom(clientId, "sessions", sessionId)}
+          />}
           {view === "detail" && selected && <ClientDetailView
             client={selected} tab={tab} onTab={setTab} onBack={() => setView("clients")}
             handlers={{

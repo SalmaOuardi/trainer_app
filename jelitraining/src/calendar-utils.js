@@ -86,8 +86,8 @@ export const formatDayLong = (d) => {
 };
 
 // Flatten sessions across all clients, attaching client context.
-// Input shape (existing): client.sessions = [{ id, date, type, duration, notes }, ...]
-// Output: [{ sessionId, clientId, clientName, date, type, duration, notes }, ...]
+// Input shape: client.sessions = [{ id, date, type, duration, notes, startTime? }, ...]
+// `startTime` is optional ("HH:MM") — legacy sessions created before Phase 2 don't have it.
 export const flattenSessions = (clients) => {
   if (!Array.isArray(clients)) return [];
   const out = [];
@@ -103,6 +103,7 @@ export const flattenSessions = (clients) => {
         type: s.type || "Autre",
         duration: s.duration,
         notes: s.notes,
+        startTime: s.startTime || null,
       });
     }
   }
@@ -118,4 +119,31 @@ export const groupByDay = (events) => {
     map.get(key).push(e);
   }
   return map;
+};
+
+// Sort comparator: timed events first (ascending by time), then untimed by client name.
+// Stable enough for Day view rendering.
+export const compareEvents = (a, b) => {
+  const at = a.startTime, bt = b.startTime;
+  if (at && bt) return at.localeCompare(bt);
+  if (at && !bt) return -1;
+  if (!at && bt) return 1;
+  return (a.clientName || "").localeCompare(b.clientName || "");
+};
+
+// "HH:MM" → minutes since midnight; null-safe.
+export const minutesFromTime = (hhmm) => {
+  if (!hhmm || typeof hhmm !== "string") return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+};
+
+// Given "HH:MM" + duration minutes, returns the end "HH:MM" (clamped to 23:59).
+export const addMinutesToTime = (hhmm, mins) => {
+  const start = minutesFromTime(hhmm);
+  const d = Number(mins);
+  if (start == null || !Number.isFinite(d) || d <= 0) return null;
+  const end = Math.min(start + d, 23 * 60 + 59);
+  return `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
 };

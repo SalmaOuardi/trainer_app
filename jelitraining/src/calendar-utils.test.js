@@ -3,6 +3,7 @@ import {
   ymd, sameDay, addDays, addMonths,
   startOfWeek, startOfMonth, monthGrid, weekDays,
   flattenSessions, groupByDay, colorForType,
+  compareEvents, minutesFromTime, addMinutesToTime,
 } from "./calendar-utils.js";
 
 describe("calendar-utils", () => {
@@ -105,5 +106,42 @@ describe("calendar-utils", () => {
     expect(e.duration).toBe("60");
     expect(e.notes).toBe("good set");
     expect(e.clientName).toBe("Real Client");
+  });
+
+  it("flattenSessions defaults startTime to null and preserves it when present", () => {
+    const clients = [{ id: "c", firstName: "A", lastName: "B", sessions: [
+      { id: "old", date: "2026-04-22", type: "Muscu", duration: "60" },
+      { id: "new", date: "2026-04-22", type: "HIIT", duration: "30", startTime: "09:30" },
+    ]}];
+    const flat = flattenSessions(clients);
+    expect(flat.find(e => e.sessionId === "old").startTime).toBeNull();
+    expect(flat.find(e => e.sessionId === "new").startTime).toBe("09:30");
+  });
+
+  it("compareEvents orders timed events first (by time), then untimed by client name", () => {
+    const a = { startTime: "09:00", clientName: "Zoe" };
+    const b = { startTime: "14:30", clientName: "Amine" };
+    const c = { startTime: null, clientName: "Bob" };
+    const d = { startTime: null, clientName: "Alice" };
+    const sorted = [c, b, d, a].sort(compareEvents);
+    expect(sorted.map(e => e.clientName)).toEqual(["Zoe", "Amine", "Alice", "Bob"]);
+  });
+
+  it("minutesFromTime parses HH:MM and returns null for bad input", () => {
+    expect(minutesFromTime("09:30")).toBe(570);
+    expect(minutesFromTime("00:00")).toBe(0);
+    expect(minutesFromTime("23:59")).toBe(23 * 60 + 59);
+    expect(minutesFromTime("")).toBeNull();
+    expect(minutesFromTime(null)).toBeNull();
+    expect(minutesFromTime("abc")).toBeNull();
+  });
+
+  it("addMinutesToTime adds duration and clamps at 23:59", () => {
+    expect(addMinutesToTime("09:00", 60)).toBe("10:00");
+    expect(addMinutesToTime("09:30", 45)).toBe("10:15");
+    expect(addMinutesToTime("23:00", 120)).toBe("23:59");
+    expect(addMinutesToTime("09:00", 0)).toBeNull();
+    expect(addMinutesToTime(null, 60)).toBeNull();
+    expect(addMinutesToTime("09:00", "abc")).toBeNull();
   });
 });

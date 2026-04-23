@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { C } from "../theme.js";
+import { Modal, Input, Sel, Textarea, Field, Btn } from "./ui.jsx";
 import {
   colorForType,
   ymd, sameDay, addDays, addMonths,
   monthGrid, weekDays,
   formatMonthYear, formatDayLong,
   WEEKDAY_SHORT_FR,
-  flattenSessions, groupByDay,
+  flattenSessions, groupByDay, compareEvents,
 } from "../calendar-utils.js";
 
 const MODES = [
@@ -15,13 +16,17 @@ const MODES = [
   { id: "day", label: "Jour" },
 ];
 
-export function CalendarView({ clients, onSelectClient }) {
+const SESSION_TYPES = ["Muscu", "Cardio", "Stretching", "HIIT", "Circuit", "Autre"];
+
+export function CalendarView({ clients, onCreateEvent, onEditEvent, onDeleteEvent }) {
   const [mode, setMode] = useState("month");
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     return d;
   });
+  // modal: null | { mode: "create", date } | { mode: "edit", event }
+  const [modal, setModal] = useState(null);
 
   const events = useMemo(() => flattenSessions(clients), [clients]);
   const byDay = useMemo(() => groupByDay(events), [events]);
@@ -40,9 +45,26 @@ export function CalendarView({ clients, onSelectClient }) {
     : formatMonthYear(cursor);
 
   const selectDay = (d) => { setCursor(d); setMode("day"); };
+  const openCreate = () => setModal({ mode: "create", date: ymd(cursor) });
+  const openEdit = (event) => setModal({ mode: "edit", event });
+
+  const handleSave = (clientId, payload) => {
+    if (modal?.mode === "edit") {
+      onEditEvent?.(modal.event.clientId, modal.event.sessionId, payload);
+    } else {
+      onCreateEvent?.(clientId, payload);
+    }
+    setModal(null);
+  };
+  const handleDelete = () => {
+    if (modal?.mode === "edit") {
+      onDeleteEvent?.(modal.event.clientId, modal.event.sessionId);
+      setModal(null);
+    }
+  };
 
   return (
-    <div style={{ padding: "18px 16px 80px", maxWidth: 1100, margin: "0 auto" }}>
+    <div style={{ padding: "18px 16px 80px", maxWidth: 1100, margin: "0 auto", position: "relative" }}>
       <Header
         periodLabel={periodLabel}
         mode={mode}
@@ -60,7 +82,20 @@ export function CalendarView({ clients, onSelectClient }) {
         <WeekView cursor={cursor} today={today} byDay={byDay} onPick={selectDay} />
       )}
       {mode === "day" && (
-        <DayView date={cursor} events={byDay.get(ymd(cursor)) || []} onSelectClient={onSelectClient} />
+        <DayView events={byDay.get(ymd(cursor)) || []} onEdit={openEdit} />
+      )}
+
+      <FAB onClick={openCreate} />
+
+      {modal && (
+        <EventModal
+          clients={clients}
+          initial={modal.mode === "edit" ? modal.event : { date: modal.date }}
+          editing={modal.mode === "edit"}
+          onClose={() => setModal(null)}
+          onSave={handleSave}
+          onDelete={modal.mode === "edit" ? handleDelete : null}
+        />
       )}
     </div>
   );
@@ -205,7 +240,7 @@ function WeekView({ cursor, today, byDay, onPick }) {
     <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
       {days.map((d, i) => {
         const key = ymd(d);
-        const sessions = byDay.get(key) || [];
+        const sessions = [...(byDay.get(key) || [])].sort(compareEvents);
         const isToday = sameDay(d, today);
         return (
           <button
@@ -236,7 +271,9 @@ function WeekView({ cursor, today, byDay, onPick }) {
                   fontSize: 10, color: C.text,
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   lineHeight: 1.2,
-                }}>{s.clientName.split(" ")[0]}</div>
+                }}>
+                  {s.startTime ? `${s.startTime} ` : ""}{s.clientName.split(" ")[0]}
+                </div>
               ))}
               {sessions.length > 4 && (
                 <div style={{ fontSize: 9, color: C.muted, textAlign: "center", marginTop: 2 }}>+{sessions.length - 4}</div>
@@ -249,8 +286,8 @@ function WeekView({ cursor, today, byDay, onPick }) {
   );
 }
 
-function DayView({ events, onSelectClient }) {
-  const sorted = [...events].sort((a, b) => (a.clientName || "").localeCompare(b.clientName || ""));
+function DayView({ events, onEdit }) {
+  const sorted = [...events].sort(compareEvents);
   return (
     <div>
       <div style={{ color: C.muted, fontSize: 12, marginBottom: 12, letterSpacing: "0.04em" }}>
@@ -266,40 +303,44 @@ function DayView({ events, onSelectClient }) {
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {sorted.map(e => <SessionCard key={e.sessionId} event={e} onSelectClient={onSelectClient} />)}
+          {sorted.map(e => <SessionCard key={e.sessionId} event={e} onEdit={onEdit} />)}
         </div>
       )}
     </div>
   );
 }
 
-function SessionCard({ event, onSelectClient }) {
+function SessionCard({ event, onEdit }) {
   const color = colorForType(event.type);
-  const clickable = typeof onSelectClient === "function" && event.clientId;
   return (
     <button
-      onClick={clickable ? () => onSelectClient(event.clientId) : undefined}
-      disabled={!clickable}
+      onClick={() => onEdit?.(event)}
       style={{
         background: C.s1, border: `1px solid ${C.border}`, borderLeft: `3px solid ${color}`,
         borderRadius: 12, padding: "14px 16px",
         display: "flex", alignItems: "center", gap: 14,
-        cursor: clickable ? "pointer" : "default", textAlign: "left", width: "100%",
+        cursor: "pointer", textAlign: "left", width: "100%",
         color: C.text, fontFamily: "inherit", transition: "all 0.15s",
         boxShadow: C.shadow1,
       }}
-      onMouseEnter={e => { if (clickable) e.currentTarget.style.background = C.s2; }}
-      onMouseLeave={e => { if (clickable) e.currentTarget.style.background = C.s1; }}
+      onMouseEnter={e => { e.currentTarget.style.background = C.s2; }}
+      onMouseLeave={e => { e.currentTarget.style.background = C.s1; }}
     >
       <div style={{
         width: 44, height: 44, borderRadius: 10,
         background: `${color}22`, border: `1px solid ${color}55`,
-        display: "flex", alignItems: "center", justifyContent: "center",
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         flexShrink: 0,
       }}>
-        <span style={{ color, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em" }}>
-          {(event.type || "").slice(0, 3).toUpperCase()}
-        </span>
+        {event.startTime ? (
+          <span style={{ color, fontSize: 11, fontWeight: 700, letterSpacing: "0.02em" }}>
+            {event.startTime}
+          </span>
+        ) : (
+          <span style={{ color, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em" }}>
+            {(event.type || "").slice(0, 3).toUpperCase()}
+          </span>
+        )}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: C.text, marginBottom: 2 }}>{event.clientName}</div>
@@ -313,9 +354,99 @@ function SessionCard({ event, onSelectClient }) {
           </div>
         )}
       </div>
-      {clickable && (
-        <span style={{ color: C.muted, fontSize: 16, flexShrink: 0 }}>›</span>
-      )}
+      <span style={{ color: C.muted, fontSize: 16, flexShrink: 0 }}>›</span>
     </button>
+  );
+}
+
+function FAB({ onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label="Nouvelle séance"
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.filter = "brightness(1.1)"; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.filter = "brightness(1)"; }}
+      style={{
+        position: "fixed", right: 20, bottom: 88,
+        width: 56, height: 56, borderRadius: "50%",
+        background: `linear-gradient(135deg, ${C.gold}, ${C.goldLight})`,
+        border: "none", color: "#000",
+        fontSize: 28, fontWeight: 300, lineHeight: 1,
+        cursor: "pointer", boxShadow: C.shadowGold,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "all 0.2s", zIndex: 50,
+        fontFamily: "inherit",
+      }}
+    >+</button>
+  );
+}
+
+function EventModal({ clients, initial, editing, onClose, onSave, onDelete }) {
+  const firstClientId = Array.isArray(clients) && clients.length > 0 ? clients[0].id : "";
+  const [f, setF] = useState(() => ({
+    clientId: initial?.clientId || firstClientId,
+    date: initial?.date || ymd(new Date()),
+    startTime: initial?.startTime || "",
+    duration: initial?.duration || "60",
+    type: initial?.type || "Muscu",
+    notes: initial?.notes || "",
+  }));
+  const [err, setErr] = useState("");
+  const set = k => e => { setF(p => ({ ...p, [k]: e.target.value })); setErr(""); };
+
+  const submit = () => {
+    if (!f.clientId) return setErr("Choisis un client.");
+    if (!f.date) return setErr("La date est requise.");
+    if (!f.duration || Number(f.duration) <= 0) return setErr("La durée doit être supérieure à 0.");
+    const payload = {
+      date: f.date,
+      type: f.type,
+      duration: f.duration,
+      notes: f.notes,
+      startTime: f.startTime || null,
+    };
+    onSave(f.clientId, payload);
+  };
+
+  const hasClients = Array.isArray(clients) && clients.length > 0;
+
+  return (
+    <Modal title={editing ? "✦ MODIFIER LA SÉANCE" : "✦ NOUVELLE SÉANCE"} onClose={onClose}>
+      <Field label="Client *">
+        <Sel value={f.clientId} onChange={set("clientId")} disabled={editing}>
+          {!hasClients && <option value="">Aucun client</option>}
+          {hasClients && clients.map(c => (
+            <option key={c.id} value={c.id}>
+              {[c.firstName, c.lastName].filter(Boolean).join(" ").trim() || "Client"}
+            </option>
+          ))}
+        </Sel>
+      </Field>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+        <Field label="Date *"><Input type="date" value={f.date} onChange={set("date")} /></Field>
+        <Field label="Heure"><Input type="time" value={f.startTime} onChange={set("startTime")} /></Field>
+      </div>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+        <Field label="Type">
+          <Sel value={f.type} onChange={set("type")}>
+            {SESSION_TYPES.map(t => <option key={t}>{t}</option>)}
+          </Sel>
+        </Field>
+        <Field label="Durée (min) *"><Input type="number" min="1" value={f.duration} onChange={set("duration")} /></Field>
+      </div>
+      <Field label="Notes"><Textarea value={f.notes} onChange={set("notes")} placeholder="Exercices, intensité, remarques…" /></Field>
+      {err && <div style={{ color: C.red, fontSize: 12, marginBottom: 8, background: C.redAlpha, borderRadius: 8, padding: "7px 12px" }}>{err}</div>}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginTop: 8 }}>
+        <div>
+          {editing && onDelete && (
+            <Btn variant="danger" onClick={onDelete}>Supprimer</Btn>
+          )}
+        </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <Btn variant="ghost" onClick={onClose}>Annuler</Btn>
+          <Btn onClick={submit} disabled={!hasClients}>{editing ? "Enregistrer" : "Créer"}</Btn>
+        </div>
+      </div>
+    </Modal>
   );
 }

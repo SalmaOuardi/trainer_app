@@ -57,6 +57,28 @@ export const sbDeleteLegacy = async () => {
   } catch {}
 };
 
+const AVAILABILITY_KEY = "jeli-availability";
+
+// Fetch the trainer's weekly availability (singleton row).
+// Returns the raw stored object, null if not present / network failure.
+export const sbGetAvailability = async () => {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/store?key=eq.${AVAILABILITY_KEY}&select=value`, { headers });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (data && data[0]) return JSON.parse(data[0].value);
+    return null;
+  } catch { return null; }
+};
+
+export const sbSaveAvailability = async (avail) => {
+  await fetch(`${SB_URL}/rest/v1/store`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates" },
+    body: JSON.stringify({ key: AVAILABILITY_KEY, value: JSON.stringify(avail) }),
+  });
+};
+
 export const sbGetPw = async () => {
   try {
     const r = await fetch(`${SB_URL}/rest/v1/store?key=eq.${PW_KEY}&select=value`, { headers });

@@ -9,6 +9,7 @@ import {
   WEEKDAY_SHORT_FR,
   flattenSessions, groupByDay, compareEvents,
 } from "../calendar-utils.js";
+import { availabilityForDate, formatHourRange } from "../availability-utils.js";
 
 const MODES = [
   { id: "month", label: "Mois" },
@@ -18,7 +19,7 @@ const MODES = [
 
 const SESSION_TYPES = ["Muscu", "Cardio", "Stretching", "HIIT", "Circuit", "Autre"];
 
-export function CalendarView({ clients, onCreateEvent, onEditEvent, onDeleteEvent }) {
+export function CalendarView({ clients, availability, onCreateEvent, onEditEvent, onDeleteEvent }) {
   const [mode, setMode] = useState("month");
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
@@ -39,6 +40,7 @@ export function CalendarView({ clients, onCreateEvent, onEditEvent, onDeleteEven
     else setCursor(c => addDays(c, dir));
   };
 
+  const cursorAvail = availability ? availabilityForDate(availability, cursor) : null;
   const periodLabel =
     mode === "day" ? formatDayLong(cursor)
     : mode === "week" ? `Semaine du ${weekDays(cursor)[0].getDate()} ${weekDays(cursor)[0].toLocaleDateString("fr-FR", { month: "short" })}`
@@ -79,10 +81,10 @@ export function CalendarView({ clients, onCreateEvent, onEditEvent, onDeleteEven
         <MonthView cursor={cursor} today={today} byDay={byDay} onPick={selectDay} />
       )}
       {mode === "week" && (
-        <WeekView cursor={cursor} today={today} byDay={byDay} onPick={selectDay} />
+        <WeekView cursor={cursor} today={today} byDay={byDay} availability={availability} onPick={selectDay} />
       )}
       {mode === "day" && (
-        <DayView events={byDay.get(ymd(cursor)) || []} onEdit={openEdit} />
+        <DayView events={byDay.get(ymd(cursor)) || []} availability={cursorAvail} onEdit={openEdit} />
       )}
 
       <FAB onClick={openCreate} />
@@ -234,7 +236,7 @@ function MonthView({ cursor, today, byDay, onPick }) {
   );
 }
 
-function WeekView({ cursor, today, byDay, onPick }) {
+function WeekView({ cursor, today, byDay, availability, onPick }) {
   const days = weekDays(cursor);
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
@@ -242,6 +244,9 @@ function WeekView({ cursor, today, byDay, onPick }) {
         const key = ymd(d);
         const sessions = [...(byDay.get(key) || [])].sort(compareEvents);
         const isToday = sameDay(d, today);
+        const avail = availability ? availabilityForDate(availability, d) : null;
+        const isOff = avail && avail.off;
+        const hourRange = avail ? formatHourRange(avail) : "";
         return (
           <button
             key={i}
@@ -254,6 +259,7 @@ function WeekView({ cursor, today, byDay, onPick }) {
               display: "flex", flexDirection: "column", gap: 6,
               cursor: "pointer", color: C.text, fontFamily: "inherit",
               transition: "all 0.15s",
+              opacity: isOff ? 0.45 : 1,
             }}
             onMouseEnter={e => { if (!isToday) e.currentTarget.style.background = C.s2; }}
             onMouseLeave={e => { if (!isToday) e.currentTarget.style.background = C.s1; }}
@@ -261,6 +267,11 @@ function WeekView({ cursor, today, byDay, onPick }) {
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 9, color: C.muted, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{WEEKDAY_SHORT_FR[i]}</div>
               <div style={{ fontSize: 18, fontWeight: isToday ? 700 : 500, color: isToday ? C.gold : C.text, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{d.getDate()}</div>
+              {avail && (
+                <div style={{ fontSize: 9, color: C.muted2, marginTop: 2, letterSpacing: "0.02em" }}>
+                  {isOff ? "Repos" : hourRange}
+                </div>
+              )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, overflow: "hidden" }}>
               {sessions.slice(0, 4).map((s, j) => (
@@ -286,12 +297,30 @@ function WeekView({ cursor, today, byDay, onPick }) {
   );
 }
 
-function DayView({ events, onEdit }) {
+function DayView({ events, availability, onEdit }) {
   const sorted = [...events].sort(compareEvents);
+  const isOff = availability && availability.off;
+  const hourRange = availability ? formatHourRange(availability) : "";
   return (
     <div>
-      <div style={{ color: C.muted, fontSize: 12, marginBottom: 12, letterSpacing: "0.04em" }}>
-        {sorted.length === 0 ? "Aucune séance" : `${sorted.length} séance${sorted.length > 1 ? "s" : ""}`}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 10, marginBottom: 12, flexWrap: "wrap",
+      }}>
+        <div style={{ color: C.muted, fontSize: 12, letterSpacing: "0.04em" }}>
+          {sorted.length === 0 ? "Aucune séance" : `${sorted.length} séance${sorted.length > 1 ? "s" : ""}`}
+        </div>
+        {availability && (
+          <div style={{
+            color: isOff ? C.muted2 : C.gold, fontSize: 11, fontWeight: 600,
+            letterSpacing: "0.04em",
+            background: isOff ? "transparent" : C.goldAlpha,
+            border: isOff ? `1px solid ${C.border}` : `1px solid ${C.goldBorder}`,
+            borderRadius: 999, padding: "3px 10px",
+          }}>
+            {isOff ? "Jour de repos" : hourRange}
+          </div>
+        )}
       </div>
       {sorted.length === 0 ? (
         <div style={{

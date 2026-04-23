@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { C } from "./theme.js";
 import { gid } from "./utils.js";
 import { loadFromStorage, saveToStorage } from "./lib.js";
-import { sbGetAll, sbSaveClient, sbDeleteClient, sbGetLegacy, sbDeleteLegacy, AUTH_KEY } from "./api.js";
+import { sbGetAll, sbSaveClient, sbDeleteClient, sbGetLegacy, sbDeleteLegacy, sbGetAvailability, sbSaveAvailability, AUTH_KEY } from "./api.js";
+import { defaultAvailability, normalizeAvailability } from "./availability-utils.js";
 import { SaveBadge } from "./components/ui.jsx";
 import { LoginScreen, ChangePasswordModal } from "./components/Auth.jsx";
 import { DashboardView } from "./components/Dashboard.jsx";
@@ -16,6 +17,7 @@ const CALENDAR_ENABLED = import.meta.env.VITE_CALENDAR_ENABLED === "true";
 export default function App() {
   const [authed, setAuthed] = useState(() => localStorage.getItem(AUTH_KEY) === "1");
   const [clients, setClients] = useState([]);
+  const [availability, setAvailability] = useState(() => defaultAvailability());
   const [view, setView] = useState("dashboard");
   const [selectedId, setSelectedId] = useState(null);
   const [tab, setTab] = useState("sessions");
@@ -60,6 +62,14 @@ export default function App() {
     })();
   }, [authed]);
 
+  useEffect(() => {
+    if (!authed) return;
+    (async () => {
+      const raw = await sbGetAvailability();
+      if (raw !== null) setAvailability(normalizeAvailability(raw));
+    })();
+  }, [authed]);
+
   if (!authed) return <LoginScreen onAuth={() => setAuthed(true)} />;
 
   const persist = nc => {
@@ -75,6 +85,19 @@ export default function App() {
       ...toSave.map(c => sbSaveClient(c)),
       ...toDelete.map(c => sbDeleteClient(c.id)),
     ]).then(() => {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    }).catch(() => {
+      setSaveStatus("error");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    });
+  };
+
+  const saveAvailability = (next) => {
+    const normalized = normalizeAvailability(next);
+    setAvailability(normalized);
+    setSaveStatus("saving");
+    sbSaveAvailability(normalized).then(() => {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2500);
     }).catch(() => {
@@ -199,11 +222,15 @@ export default function App() {
           {view === "clients" && <ClientsView clients={clients} search={search} onSearch={setSearch} onSelect={id => goTo(id)} onAdd={() => setModal("addClient")} />}
           {view === "calendar" && CALENDAR_ENABLED && <CalendarView
             clients={clients}
+            availability={availability}
             onCreateEvent={(clientId, s) => addTo(clientId, "sessions", s)}
             onEditEvent={(clientId, sessionId, u) => updateIn(clientId, "sessions", sessionId, u)}
             onDeleteEvent={(clientId, sessionId) => removeFrom(clientId, "sessions", sessionId)}
           />}
-          {view === "settings" && CALENDAR_ENABLED && <SettingsView />}
+          {view === "settings" && CALENDAR_ENABLED && <SettingsView
+            availability={availability}
+            onSaveAvailability={saveAvailability}
+          />}
           {view === "detail" && selected && <ClientDetailView
             client={selected} tab={tab} onTab={setTab} onBack={() => setView("clients")}
             handlers={{

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { C } from "../theme.js";
-import { Btn } from "./ui.jsx";
+import { Btn, Input } from "./ui.jsx";
+import { DAY_KEYS, DAY_LABELS_FR, defaultAvailability, normalizeAvailability } from "../availability-utils.js";
 
 const FEED_TOKEN = import.meta.env.VITE_ICAL_FEED_TOKEN || "";
 
-export function SettingsView() {
+export function SettingsView({ availability, onSaveAvailability }) {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const feedUrl = FEED_TOKEN ? `${origin}/api/ical?token=${FEED_TOKEN}` : "";
   const webcalUrl = feedUrl ? feedUrl.replace(/^https?:/, "webcal:") : "";
@@ -25,6 +26,8 @@ export function SettingsView() {
         margin: "0 0 24px", fontSize: 24, fontWeight: 700, color: C.text,
         fontFamily: "'Cormorant Garamond',Georgia,serif", letterSpacing: "0.02em",
       }}>Réglages</h1>
+
+      <AvailabilityCard availability={availability} onSave={onSaveAvailability} />
 
       <section style={{
         background: C.s1, border: `1px solid ${C.border}`, borderRadius: 14,
@@ -87,5 +90,97 @@ export function SettingsView() {
         )}
       </section>
     </div>
+  );
+}
+
+function AvailabilityCard({ availability, onSave }) {
+  const initial = useMemo(() => normalizeAvailability(availability || defaultAvailability()), [availability]);
+  const [draft, setDraft] = useState(initial);
+
+  // The form is seeded from `initial` on mount; subsequent props updates reset the draft
+  // only when we haven't diverged (otherwise we'd clobber the user's in-progress edits).
+  const dirty = JSON.stringify(draft) !== JSON.stringify(initial);
+
+  const updateDay = (key, patch) => {
+    setDraft(d => ({ ...d, [key]: { ...d[key], ...patch } }));
+  };
+
+  const save = () => {
+    if (typeof onSave === "function") onSave(draft);
+  };
+  const reset = () => setDraft(initial);
+
+  return (
+    <section style={{
+      background: C.s1, border: `1px solid ${C.border}`, borderRadius: 14,
+      padding: "20px 18px", boxShadow: C.shadow1, marginBottom: 16,
+    }}>
+      <div style={{
+        color: C.gold, fontSize: 11, fontWeight: 700,
+        letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8,
+      }}>Disponibilités hebdomadaires</div>
+      <p style={{ color: C.muted, fontSize: 13, lineHeight: 1.55, margin: "0 0 16px" }}>
+        Tes horaires de travail habituels, affichés dans le Calendrier. Les jours de
+        repos apparaissent en grisé.
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {DAY_KEYS.map(key => {
+          const rec = draft[key];
+          return (
+            <div key={key} style={{
+              background: C.s2, border: `1px solid ${C.border}`, borderRadius: 10,
+              padding: "10px 12px",
+              display: "grid",
+              gridTemplateColumns: "80px 1fr 1fr auto",
+              alignItems: "center",
+              gap: 10,
+              opacity: rec.off ? 0.6 : 1,
+            }}>
+              <div style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>
+                {DAY_LABELS_FR[key]}
+              </div>
+              <Input
+                type="time"
+                value={rec.start}
+                disabled={rec.off}
+                onChange={e => updateDay(key, { start: e.target.value })}
+                style={{ padding: "6px 8px", fontSize: 12 }}
+              />
+              <Input
+                type="time"
+                value={rec.end}
+                disabled={rec.off}
+                onChange={e => updateDay(key, { end: e.target.value })}
+                style={{ padding: "6px 8px", fontSize: 12 }}
+              />
+              <label style={{
+                display: "flex", alignItems: "center", gap: 6,
+                color: C.muted, fontSize: 11, cursor: "pointer",
+                userSelect: "none",
+              }}>
+                <input
+                  type="checkbox"
+                  checked={rec.off}
+                  onChange={e => updateDay(key, { off: e.target.checked })}
+                  style={{ cursor: "pointer", accentColor: C.gold }}
+                />
+                Repos
+              </label>
+            </div>
+          );
+        })}
+      </div>
+
+      {dirty && (
+        <div style={{
+          display: "flex", justifyContent: "flex-end", gap: 10,
+          marginTop: 16,
+        }}>
+          <Btn variant="ghost" onClick={reset}>Annuler</Btn>
+          <Btn onClick={save}>Enregistrer</Btn>
+        </div>
+      )}
+    </section>
   );
 }

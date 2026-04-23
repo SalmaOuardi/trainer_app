@@ -9,6 +9,7 @@ import { DashboardView } from "./components/Dashboard.jsx";
 import { ClientsView } from "./components/Clients.jsx";
 import { AddClientModal, ClientDetailView } from "./components/ClientDetail.jsx";
 import { CalendarView } from "./components/Calendar.jsx";
+import { SettingsView } from "./components/Settings.jsx";
 
 const CALENDAR_ENABLED = import.meta.env.VITE_CALENDAR_ENABLED === "true";
 
@@ -106,6 +107,7 @@ export default function App() {
     { id: "dashboard", icon: "◈", label: "Dashboard" },
     { id: "clients", icon: "◉", label: "Mes clients" },
     ...(CALENDAR_ENABLED ? [{ id: "calendar", icon: "◐", label: "Calendrier" }] : []),
+    ...(CALENDAR_ENABLED ? [{ id: "settings", icon: "⚙", label: "Réglages" }] : []),
   ];
   const closeNav = () => setSideOpen(false);
 
@@ -201,6 +203,7 @@ export default function App() {
             onEditEvent={(clientId, sessionId, u) => updateIn(clientId, "sessions", sessionId, u)}
             onDeleteEvent={(clientId, sessionId) => removeFrom(clientId, "sessions", sessionId)}
           />}
+          {view === "settings" && CALENDAR_ENABLED && <SettingsView />}
           {view === "detail" && selected && <ClientDetailView
             client={selected} tab={tab} onTab={setTab} onBack={() => setView("clients")}
             handlers={{

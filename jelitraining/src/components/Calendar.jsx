@@ -421,6 +421,7 @@ function EventModal({ clients, initial, editing, onClose, onSave, onDelete }) {
     notes: initial?.notes || "",
   }));
   const [err, setErr] = useState("");
+  const [inviteState, setInviteState] = useState({ status: "idle", message: "" });
   const set = k => e => { setF(p => ({ ...p, [k]: e.target.value })); setErr(""); };
 
   const submit = () => {
@@ -438,6 +439,34 @@ function EventModal({ clients, initial, editing, onClose, onSave, onDelete }) {
   };
 
   const hasClients = Array.isArray(clients) && clients.length > 0;
+  const currentClient = hasClients ? clients.find(c => c.id === f.clientId) : null;
+  const clientEmail = currentClient?.email || "";
+  const inviteToken = import.meta.env.VITE_INVITE_TOKEN || "";
+  const canInvite = editing && !!initial?.sessionId && !!clientEmail && !!inviteToken;
+
+  const sendInvite = async () => {
+    if (!canInvite || inviteState.status === "sending") return;
+    setInviteState({ status: "sending", message: "" });
+    try {
+      const r = await fetch("/api/send-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: initial.clientId,
+          sessionId: initial.sessionId,
+          token: inviteToken,
+        }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setInviteState({ status: "error", message: data?.error || `Erreur ${r.status}` });
+        return;
+      }
+      setInviteState({ status: "success", message: `Envoyé à ${data.to || clientEmail}` });
+    } catch (e) {
+      setInviteState({ status: "error", message: String(e?.message || e) });
+    }
+  };
 
   return (
     <Modal title={editing ? "✦ MODIFIER LA SÉANCE" : "✦ NOUVELLE SÉANCE"} onClose={onClose}>
@@ -465,6 +494,32 @@ function EventModal({ clients, initial, editing, onClose, onSave, onDelete }) {
       </div>
       <Field label="Notes"><Textarea value={f.notes} onChange={set("notes")} placeholder="Exercices, intensité, remarques…" /></Field>
       {err && <div style={{ color: C.red, fontSize: 12, marginBottom: 8, background: C.redAlpha, borderRadius: 8, padding: "7px 12px" }}>{err}</div>}
+      {editing && inviteToken && (
+        <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 14, marginTop: 6, marginBottom: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 12, color: C.muted }}>
+              {clientEmail
+                ? <>Invitation à <strong style={{ color: C.text }}>{clientEmail}</strong></>
+                : "Ce client n'a pas d'email."}
+            </div>
+            <Btn
+              variant="outline"
+              onClick={sendInvite}
+              disabled={!canInvite || inviteState.status === "sending"}
+            >
+              {inviteState.status === "sending" ? "Envoi…" : "Envoyer l'invitation"}
+            </Btn>
+          </div>
+          {inviteState.status === "success" && (
+            <div style={{ color: C.gold, fontSize: 12, marginTop: 8 }}>✓ {inviteState.message}</div>
+          )}
+          {inviteState.status === "error" && (
+            <div style={{ color: C.red, fontSize: 12, marginTop: 8, background: C.redAlpha, borderRadius: 8, padding: "7px 12px" }}>
+              {inviteState.message}
+            </div>
+          )}
+        </div>
+      )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginTop: 8 }}>
         <div>
           {editing && onDelete && (

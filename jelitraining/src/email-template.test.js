@@ -6,6 +6,7 @@ import {
   buildPreheader,
   buildText,
   buildHtml,
+  BRAND_NAME,
 } from "./email-template.js";
 
 const SAMPLE = {
@@ -15,7 +16,9 @@ const SAMPLE = {
   duration: "60",
   type: "Muscu",
   notes: "Genou — y aller doucement",
-  coachName: "Coach Jeli",
+  coachName: "Jefferson Limol",
+  whatsappUrl: "https://wa.me/33783976727",
+  whatsappDisplay: "+33 7 83 97 67 27",
 };
 
 describe("email-template", () => {
@@ -52,12 +55,12 @@ describe("email-template", () => {
 
   describe("buildPreheader", () => {
     it("mentions the coach and the date", () => {
-      const p = buildPreheader({ coachName: "Coach Jeli", date: "2026-05-01" });
-      expect(p).toContain("Coach Jeli");
+      const p = buildPreheader({ coachName: "Jefferson Limol", date: "2026-05-01" });
+      expect(p).toContain("Jefferson Limol");
       expect(p).toContain("1 mai 2026");
     });
     it("stays under 120 characters (inbox snippet limit)", () => {
-      const p = buildPreheader({ coachName: "Coach Jeli", date: "2026-05-01" });
+      const p = buildPreheader({ coachName: "Jefferson Limol", date: "2026-05-01" });
       expect(p.length).toBeLessThanOrEqual(120);
     });
   });
@@ -66,11 +69,23 @@ describe("email-template", () => {
     it("includes client, coach, date, time, type, notes", () => {
       const t = buildText(SAMPLE);
       expect(t).toContain("Amine K");
-      expect(t).toContain("Coach Jeli");
+      expect(t).toContain("Jefferson Limol");
       expect(t).toContain("1 mai 2026");
       expect(t).toContain("09:00 (60 min)");
       expect(t).toContain("Muscu");
       expect(t).toContain("Genou");
+    });
+    it("includes the brand signoff line", () => {
+      expect(buildText(SAMPLE)).toContain(`Coach ${BRAND_NAME}`);
+      expect(buildText(SAMPLE)).toContain("À bientôt");
+    });
+    it("includes the WhatsApp number when whatsappDisplay is set", () => {
+      expect(buildText(SAMPLE)).toContain("+33 7 83 97 67 27");
+      expect(buildText(SAMPLE)).toContain("WhatsApp");
+    });
+    it("omits the WhatsApp line when whatsappDisplay is empty", () => {
+      const t = buildText({ ...SAMPLE, whatsappDisplay: "" });
+      expect(t).not.toContain("WhatsApp");
     });
     it("omits the Note line when notes are empty", () => {
       const t = buildText({ ...SAMPLE, notes: "" });
@@ -86,27 +101,65 @@ describe("email-template", () => {
     it("includes client, coach, date, time, type", () => {
       const html = buildHtml(SAMPLE);
       expect(html).toContain("Amine K");
-      expect(html).toContain("Coach Jeli");
+      expect(html).toContain("Jefferson Limol");
       expect(html).toContain("1 mai 2026");
       expect(html).toContain("Muscu");
+    });
+    it("renders the JT gold-pill logo and JELITRAINING wordmark", () => {
+      const html = buildHtml(SAMPLE);
+      expect(html).toContain(">JT<");
+      expect(html).toContain(">JELITRAINING<");
+      expect(html).toContain("#C9A84C");
+    });
+    it("renders the brand signoff (Coach JeliTraining)", () => {
+      const html = buildHtml(SAMPLE);
+      expect(html).toContain("À bientôt");
+      expect(html).toContain(`Coach ${BRAND_NAME}`);
     });
     it("escapes user-controlled content (XSS)", () => {
       const html = buildHtml({ ...SAMPLE, clientName: "<script>x</script>" });
       expect(html).not.toContain("<script>x</script>");
       expect(html).toContain("&lt;script&gt;x&lt;/script&gt;");
     });
-    it("omits the notes paragraph when notes are empty", () => {
+    it("escapes user-controlled notes (XSS)", () => {
+      const html = buildHtml({ ...SAMPLE, notes: "<img onerror=alert(1)>" });
+      expect(html).not.toContain("<img onerror=alert(1)>");
+      expect(html).toContain("&lt;img onerror=alert(1)&gt;");
+    });
+    it("omits the notes block entirely when notes are empty", () => {
       const html = buildHtml({ ...SAMPLE, notes: "" });
-      expect(html).not.toMatch(/<em>/);
+      expect(html).not.toContain("border-left:3px solid");
     });
-    it("includes the preheader as a hidden div when provided", () => {
+    it("renders the preheader as visible italic text (not a hidden div)", () => {
       const html = buildHtml({ ...SAMPLE, preheader: "Confirmation de séance" });
-      expect(html).toContain("display:none");
       expect(html).toContain("Confirmation de séance");
+      expect(html).toContain("font-style:italic");
     });
-    it("omits the preheader div when preheader is not provided", () => {
-      const html = buildHtml(SAMPLE);
+    it("contains no hidden HTML (avoids iCloud spam triggers)", () => {
+      const html = buildHtml({ ...SAMPLE, preheader: "anything" });
+      expect(html).not.toContain("display:none");
       expect(html).not.toContain("mso-hide:all");
+    });
+    it("renders the WhatsApp link with the URL and display number", () => {
+      const html = buildHtml(SAMPLE);
+      expect(html).toContain('href="https://wa.me/33783976727"');
+      expect(html).toContain("+33 7 83 97 67 27");
+      expect(html).toContain(">WhatsApp</a>");
+    });
+    it("omits the contact section when whatsappUrl is empty", () => {
+      const html = buildHtml({ ...SAMPLE, whatsappUrl: "" });
+      expect(html).not.toContain("WhatsApp");
+      expect(html).not.toContain("wa.me");
+    });
+    it("renders WhatsApp link without the number when display is empty but URL set", () => {
+      const html = buildHtml({ ...SAMPLE, whatsappDisplay: "" });
+      expect(html).toContain('href="https://wa.me/33783976727"');
+      expect(html).not.toContain("au .");
+    });
+    it("escapes the WhatsApp URL (XSS)", () => {
+      const html = buildHtml({ ...SAMPLE, whatsappUrl: 'javascript:alert(1)"' });
+      expect(html).not.toContain('href="javascript:alert(1)"');
+      expect(html).toContain("&quot;");
     });
   });
 });

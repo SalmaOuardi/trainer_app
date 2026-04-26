@@ -25,6 +25,8 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.INVITE_FROM_EMAIL || "onboarding@resend.dev";
 const REPLY_TO = process.env.INVITE_REPLY_TO_EMAIL || "";
 const FROM_NAME = process.env.VITE_COACH_FULLNAME || "jelitraining";
+const WHATSAPP_URL = process.env.COACH_WHATSAPP_URL || "";
+const WHATSAPP_DISPLAY = process.env.COACH_WHATSAPP_DISPLAY || "";
 
 const CLIENT_PREFIX = "jeli-client-";
 
@@ -94,6 +96,8 @@ export default async function handler(req, res) {
       type: session.type,
       notes: session.notes,
       coachName: FROM_NAME,
+      whatsappUrl: WHATSAPP_URL,
+      whatsappDisplay: WHATSAPP_DISPLAY,
     };
     const preheader = buildPreheader(templateInput);
     const html = buildHtml({ ...templateInput, preheader });

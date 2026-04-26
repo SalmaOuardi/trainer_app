@@ -15,7 +15,6 @@ const SAMPLE = {
   startTime: "09:00",
   duration: "60",
   type: "Muscu",
-  notes: "Genou — y aller doucement",
   coachName: "Jefferson Limol",
   whatsappUrl: "https://wa.me/33783976727",
   whatsappDisplay: "+33 7 83 97 67 27",
@@ -66,14 +65,18 @@ describe("email-template", () => {
   });
 
   describe("buildText", () => {
-    it("includes client, coach, date, time, type, notes", () => {
+    it("includes client, coach, date, time, type", () => {
       const t = buildText(SAMPLE);
       expect(t).toContain("Amine K");
       expect(t).toContain("Jefferson Limol");
       expect(t).toContain("1 mai 2026");
       expect(t).toContain("09:00 (60 min)");
       expect(t).toContain("Muscu");
-      expect(t).toContain("Genou");
+    });
+    it("never leaks trainer notes (notes are intentionally omitted)", () => {
+      const t = buildText({ ...SAMPLE, notes: "Genou — y aller doucement" });
+      expect(t).not.toContain("Genou");
+      expect(t).not.toContain("Note");
     });
     it("includes the brand signoff line", () => {
       expect(buildText(SAMPLE)).toContain(`Coach ${BRAND_NAME}`);
@@ -86,10 +89,6 @@ describe("email-template", () => {
     it("omits the WhatsApp line when whatsappDisplay is empty", () => {
       const t = buildText({ ...SAMPLE, whatsappDisplay: "" });
       expect(t).not.toContain("WhatsApp");
-    });
-    it("omits the Note line when notes are empty", () => {
-      const t = buildText({ ...SAMPLE, notes: "" });
-      expect(t).not.toContain("Note :");
     });
     it("uses 'toute la journée' when there is no startTime", () => {
       const t = buildText({ ...SAMPLE, startTime: null });
@@ -121,14 +120,9 @@ describe("email-template", () => {
       expect(html).not.toContain("<script>x</script>");
       expect(html).toContain("&lt;script&gt;x&lt;/script&gt;");
     });
-    it("escapes user-controlled notes (XSS)", () => {
-      const html = buildHtml({ ...SAMPLE, notes: "<img onerror=alert(1)>" });
-      expect(html).not.toContain("<img onerror=alert(1)>");
-      expect(html).toContain("&lt;img onerror=alert(1)&gt;");
-    });
-    it("omits the notes block entirely when notes are empty", () => {
-      const html = buildHtml({ ...SAMPLE, notes: "" });
-      expect(html).not.toContain("border-left:3px solid");
+    it("never leaks trainer notes (notes are intentionally omitted)", () => {
+      const html = buildHtml({ ...SAMPLE, notes: "Genou — y aller doucement" });
+      expect(html).not.toContain("Genou");
     });
     it("renders the preheader as visible italic text (not a hidden div)", () => {
       const html = buildHtml({ ...SAMPLE, preheader: "Confirmation de séance" });

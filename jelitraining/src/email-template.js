@@ -20,7 +20,6 @@ const TEXT_MUTED = "#888";
 const TEXT_FAINT = "#999";
 const BG_PAGE = "#FAFAF7";
 const BG_CARD = "#ffffff";
-const BG_NOTES = "#FAF7F0";
 const BORDER_FAINT = "#f0f0f0";
 
 const FONT_STACK = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
@@ -61,12 +60,11 @@ export const buildPreheader = ({ coachName, date }) =>
   `Confirmation de votre séance avec ${coachName} le ${formatDateFR(date)}.`;
 
 export const buildText = ({
-  clientName, date, startTime, duration, type, notes, coachName,
+  clientName, date, startTime, duration, type, coachName,
   whatsappDisplay,
 }) => {
   const dateStr = formatDateFR(date);
   const timeStr = formatTimeFR(startTime, duration);
-  const notesBlock = notes ? `\nNote : ${notes}\n` : "";
   const contactLine = whatsappDisplay
     ? `\nPour toute question, contactez-moi sur WhatsApp au ${whatsappDisplay}.\n`
     : "";
@@ -77,7 +75,7 @@ Voici les détails de votre prochaine séance avec ${coachName} :
   Date    : ${dateStr}
   Horaire : ${timeStr}
   Type    : ${type || "Séance"}
-${notesBlock}
+
 Cliquez sur la pièce jointe .ics pour ajouter la séance à votre calendrier.
 ${contactLine}
 À bientôt,
@@ -101,15 +99,6 @@ const renderDetailRow = (icon, value, isFirst) => `
       </td>
     </tr>`;
 
-const renderNotes = (notes) => notes
-  ? `
-  <div style="padding:0 32px 24px">
-    <div style="background:${BG_NOTES};border-left:3px solid ${GOLD};padding:12px 16px;border-radius:4px">
-      <p style="margin:0;color:${TEXT_SOFT};font-style:italic;font-size:14px;font-family:${FONT_STACK};line-height:1.5">${escapeHtml(notes)}</p>
-    </div>
-  </div>`
-  : "";
-
 const renderContact = (whatsappUrl, whatsappDisplay) => {
   if (!whatsappUrl) return "";
   const numberSuffix = whatsappDisplay ? ` au ${escapeHtml(whatsappDisplay)}` : "";
@@ -123,7 +112,7 @@ const renderContact = (whatsappUrl, whatsappDisplay) => {
 };
 
 export const buildHtml = ({
-  clientName, date, startTime, duration, type, notes, coachName,
+  clientName, date, startTime, duration, type, coachName,
   preheader, whatsappUrl, whatsappDisplay,
 }) => {
   const dateStr = formatDateFR(date);
@@ -151,7 +140,7 @@ export const buildHtml = ({
         ${renderDetailRow("⏰", timeStr, false)}
         ${renderDetailRow("💪", type || "Séance", false)}
       </table>
-    </div>${renderNotes(notes)}
+    </div>
     <div style="padding:0 32px 24px">
       <p style="margin:0;color:${TEXT_MUTED};font-size:13px;font-family:${FONT_STACK};line-height:1.5">📎 Cliquez sur la pièce jointe <code style="background:${BG_PAGE};padding:1px 5px;border-radius:3px;font-size:12px">.ics</code> pour ajouter la séance à votre calendrier.</p>
     </div>${renderContact(whatsappUrl, whatsappDisplay)}

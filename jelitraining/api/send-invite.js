@@ -74,6 +74,8 @@ export default async function handler(req, res) {
     }
 
     const clientName = fullName(client);
+    // Trainer-only notes are intentionally NOT included in the .ics or email
+    // body — they are private planning notes, not client-facing copy.
     const event = {
       sessionId: session.id,
       clientId: client.id,
@@ -81,7 +83,6 @@ export default async function handler(req, res) {
       date: session.date,
       type: session.type,
       duration: session.duration,
-      notes: session.notes,
       startTime: session.startTime || null,
     };
 
@@ -94,7 +95,6 @@ export default async function handler(req, res) {
       startTime: session.startTime,
       duration: session.duration,
       type: session.type,
-      notes: session.notes,
       coachName: FROM_NAME,
       whatsappUrl: WHATSAPP_URL,
       whatsappDisplay: WHATSAPP_DISPLAY,

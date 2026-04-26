@@ -562,6 +562,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
             <Sel value={client.status || "actif"} onChange={e => mutations.updateStatus(e.target.value)} style={{ width: "auto", padding: "7px 12px", fontSize: 12 }}>
               <option value="actif">Actif</option><option value="inactif">Inactif</option>
             </Sel>
+            <Btn variant="ghost" onClick={() => setEditOpen(true)}>✏️ Modifier</Btn>
             <Btn variant="danger" onClick={() => { if (window.confirm(`Supprimer ${client.firstName} ${client.lastName} ?`)) mutations.delete(); }}>Supprimer</Btn>
           </div>
         </div>

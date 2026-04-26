@@ -9,8 +9,8 @@
 ## Current status
 
 - **Branch of record:** `main`
-- **Last merged:** PR #15 — Weekly availability config (Phase 2c), commit `a649f5c`
-- **Next target:** Phase 3a — Email invites via Resend (manual button + serverless function)
+- **Last merged:** PR #16 — Email invites via Resend (Phase 3a), commit `7b734d7`
+- **Next target:** Phase 3b — Email template polish (HTML layout, French copy, sender identity)
 - **App status:** live in production, used by a real trainer. Do not break.
 
 ---

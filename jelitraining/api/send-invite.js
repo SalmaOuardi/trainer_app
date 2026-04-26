@@ -7,53 +7,28 @@
 //   spam arbitrary recipients.
 // - Token lives in VITE_INVITE_TOKEN (dual-use, same pattern as VITE_ICAL_FEED_TOKEN):
 //   baked into the client bundle because the SPA is already password-gated.
-// - Resend FROM must be a verified domain. Until one is set up, the sandbox sender
-//   can only deliver to the Resend account owner.
+// - Email body (HTML, plain-text, subject, preheader) lives in src/email-template.js
+//   so it stays unit-testable and the function stays thin.
 
 import { buildICal } from "../src/ical-utils.js";
+import {
+  buildHtml,
+  buildText,
+  buildSubject,
+  buildPreheader,
+} from "../src/email-template.js";
 
 const SB_URL = process.env.VITE_SUPABASE_URL;
 const SB_KEY = process.env.VITE_SUPABASE_KEY;
 const INVITE_TOKEN = process.env.VITE_INVITE_TOKEN;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.INVITE_FROM_EMAIL || "onboarding@resend.dev";
+const REPLY_TO = process.env.INVITE_REPLY_TO_EMAIL || "";
 const FROM_NAME = process.env.VITE_COACH_FULLNAME || "jelitraining";
 
 const CLIENT_PREFIX = "jeli-client-";
 
 const fullName = (c) => [c?.firstName, c?.lastName].filter(Boolean).join(" ").trim() || "Client";
-
-const formatDateFR = (ymd) => {
-  const [y, m, d] = String(ymd).split("-").map(Number);
-  const dt = new Date(Date.UTC(y, (m || 1) - 1, d || 1));
-  return dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-};
-
-const buildHtml = ({ clientName, date, startTime, duration, type, notes, coachName }) => {
-  const dateStr = formatDateFR(date);
-  const timeStr = startTime ? `${startTime} (${duration} min)` : "(toute la journée)";
-  const notesHtml = notes ? `<p style="margin:12px 0;color:#555"><em>${escapeHtml(notes)}</em></p>` : "";
-  return `<!doctype html>
-<html><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#222;max-width:520px;margin:0 auto;padding:24px">
-  <h2 style="margin:0 0 16px">Bonjour ${escapeHtml(clientName)},</h2>
-  <p>Voici votre prochaine séance avec ${escapeHtml(coachName)} :</p>
-  <table style="border-collapse:collapse;margin:16px 0">
-    <tr><td style="padding:4px 12px 4px 0;color:#888">Date</td><td style="padding:4px 0"><strong>${escapeHtml(dateStr)}</strong></td></tr>
-    <tr><td style="padding:4px 12px 4px 0;color:#888">Horaire</td><td style="padding:4px 0"><strong>${escapeHtml(timeStr)}</strong></td></tr>
-    <tr><td style="padding:4px 12px 4px 0;color:#888">Type</td><td style="padding:4px 0"><strong>${escapeHtml(type || "Séance")}</strong></td></tr>
-  </table>
-  ${notesHtml}
-  <p style="color:#555">Le fichier <code>.ics</code> joint ajoute la séance à votre calendrier (iPhone, Google, Outlook).</p>
-  <p style="color:#888;font-size:12px;margin-top:32px">— ${escapeHtml(coachName)}</p>
-</body></html>`;
-};
-
-const escapeHtml = (s) => String(s == null ? "" : s)
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;")
-  .replace(/"/g, "&quot;")
-  .replace(/'/g, "&#39;");
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -111,7 +86,7 @@ export default async function handler(req, res) {
     const icsBody = buildICal([event], { calName: FROM_NAME });
     const icsBase64 = Buffer.from(icsBody, "utf-8").toString("base64");
 
-    const html = buildHtml({
+    const templateInput = {
       clientName,
       date: session.date,
       startTime: session.startTime,
@@ -119,9 +94,23 @@ export default async function handler(req, res) {
       type: session.type,
       notes: session.notes,
       coachName: FROM_NAME,
-    });
+    };
+    const preheader = buildPreheader(templateInput);
+    const html = buildHtml({ ...templateInput, preheader });
+    const text = buildText(templateInput);
+    const subject = buildSubject({ type: session.type, date: session.date });
 
-    const subject = `Séance ${session.type || ""} — ${formatDateFR(session.date)}`.trim();
+    const emailPayload = {
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: [client.email],
+      subject,
+      html,
+      text,
+      attachments: [
+        { filename: "seance.ics", content: icsBase64 },
+      ],
+    };
+    if (REPLY_TO) emailPayload.reply_to = REPLY_TO;
 
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -129,15 +118,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: `${FROM_NAME} <${FROM_EMAIL}>`,
-        to: [client.email],
-        subject,
-        html,
-        attachments: [
-          { filename: "seance.ics", content: icsBase64 },
-        ],
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     if (!resendRes.ok) {

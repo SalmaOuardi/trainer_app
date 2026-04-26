@@ -9,9 +9,10 @@
 ## Current status
 
 - **Branch of record:** `main`
-- **Last merged:** PR #16 — Email invites via Resend (Phase 3a), commit `7b734d7`
-- **Next target:** Phase 3b — Email template polish (HTML layout, French copy, sender identity)
+- **Last merged:** PR #22 — Polish email template, logo, brand colors, WhatsApp contact (Phase 3b.2)
+- **Next target:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
 - **App status:** live in production, used by a real trainer. Do not break.
+- **Pending prod rollout:** `VITE_CALENDAR_ENABLED` is still `false` in Vercel Production — calendar + réglages tabs are built and shipped but not visible on the live app yet. Flip the env var + redeploy when ready to expose to the trainer.
 
 ---
 
@@ -23,32 +24,12 @@
 | 2a | Event CRUD with time-of-day support | ✅ merged | #13 |
 | 2b | iPhone `.ics` subscription feed (webcal, Vercel serverless) | ✅ merged | #14 |
 | 2c | Weekly availability config in Settings | ✅ merged | #15 |
-| 3a | Manual "Send invite" button + `api/send-invite.js` (Resend, HTML + `.ics`) | 🚧 in progress | — |
-| 3b | Email template polish (HTML layout, French copy, sender identity) | 💭 later | — |
-| 3c | Auto-send on event create or bulk resend | 💭 later | — |
+| 3a | Manual "Send invite" button + `api/send-invite.js` (Resend, HTML + `.ics`) | ✅ merged | #16 |
+| 3b.1 | Extract template module + plain-text fallback + Reply-To support | ✅ merged | #21 |
+| 3b.2 | Visual + copy polish: logo, brand colors, emoji icons, WhatsApp contact | ✅ merged | #22 |
+| 3c.1 | Bulk resend (one click → invites for all upcoming sessions of a client) | 💭 next | — |
+| 3c.2 | Auto-send on event create (with safety guards: ≥ tomorrow, opt-in toggle) | 💭 later | — |
 | later | Recurring events, reminders, client view | 💭 not planned | — |
-
----
-
-## Phase 3a — decisions locked in
-
-1. **Platform** — Vercel serverless function (`api/send-invite.js`), matches Phase 2b pattern.
-2. **Trigger** — manual "Envoyer l'invitation" button inside the event edit modal. Auto-send + bulk resend deferred to 3c.
-3. **Content** — HTML email body (French) + `.ics` attachment built with the existing `buildICal` helper (`METHOD:PUBLISH`).
-
-### Phase 3a env + prep
-
-- ✅ **Resend API key rotated.** Old `re_cLUPmnNM_...` was pasted in chat once — replaced with a fresh key in Vercel.
-- ⏳ **Sender domain NOT verified yet** — no custom domain (using `*.vercel.app`). Resend sandbox sender `onboarding@resend.dev` only delivers to the Resend account owner's email. So 3a can be shipped and self-tested, but real client delivery is blocked until a domain is bought + DNS-verified in Resend. Defer domain purchase decision.
-- Vercel env vars:
-  - `RESEND_API_KEY` — **server-only** (no `VITE_` prefix). Preview + Production.
-  - `INVITE_FROM_EMAIL` — server-only. Leave unset for now; defaults to `onboarding@resend.dev`. Set once a domain is verified.
-  - `VITE_INVITE_TOKEN` — dual-use (same pattern as `VITE_ICAL_FEED_TOKEN`). Shared secret the SPA sends with every POST; server rejects anything else. Generate with `openssl rand -hex 32`. Preview + Production.
-- Resend free tier: 3k emails/month, 100/day.
-
-### Phase 3a abuse protection
-
-The serverless function takes `{ clientId, sessionId, token }` — **not** a user-supplied email. Server loads the client row from Supabase and uses the stored email, so a leaked token can't fan out to arbitrary recipients.
 
 ---
 
@@ -85,7 +66,8 @@ Everything persists to a single Supabase `store` table (key-value). Known keys:
 ### Serverless (`jelitraining/api/`)
 
 - `api/ical.js` — iPhone `.ics` feed. Token-gated via `VITE_ICAL_FEED_TOKEN` query param.
-- `api/send-invite.js` — Resend-backed client invite. POST `{ clientId, sessionId, token }`, server looks up client + session in Supabase and emails the stored address with an `.ics` attachment. (Phase 3a)
+- `api/send-invite.js` — Resend-backed client invite. POST `{ clientId, sessionId, token }`, server looks up client + session in Supabase and emails the stored address with an `.ics` attachment. Email body is built in `src/email-template.js` (importable + unit-tested).
+- **Invite endpoint security:** the function takes `{ clientId, sessionId, token }` — never a user-supplied email. Server reads the stored email from Supabase, so a leaked token can't fan out to arbitrary recipients.
 - ESLint: `api/**/*.js` is treated as Node globals (see `eslint.config.js` override).
 - **Gotcha:** Vercel Preview Protection gates `/api/*` behind SSO — external clients (iOS subscription, `curl`) fail on Preview URLs until protection is toggled off in project settings. Test serverless endpoints on production or toggle protection temporarily. ([memory note](~/.claude/projects/-Users-salmaouardi-conductor-repos-trainer-app/memory/project_vercel_preview_protection.md))
 

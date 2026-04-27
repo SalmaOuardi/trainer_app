@@ -15,6 +15,50 @@ import { SettingsView } from "./components/Settings.jsx";
 
 const CALENDAR_ENABLED = import.meta.env.VITE_CALENDAR_ENABLED === "true";
 
+function SideBtn({ onClick, icon, label }) {
+  return (
+    <button onClick={onClick}
+      onMouseEnter={e => { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; }}
+      style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit", marginBottom: 2, transition: "all 0.15s" }}>
+      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18 }}>{icon}</span>{label}
+    </button>
+  );
+}
+
+function SidebarContent({ onNav, navItems, view, setView, saveStatus, setChangePwOpen }) {
+  return (
+    <>
+      <div style={{ padding: "22px 18px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.2))`, border: `1.5px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
+          <span style={{ color: C.gold, fontSize: 13, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
+        </div>
+        <div>
+          <div style={{ color: C.text, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em" }}>JELI<span style={{ color: C.gold }}>TRAINING</span></div>
+          <div style={{ color: C.muted, fontSize: 10, marginTop: 1 }}>Coach Dashboard</div>
+        </div>
+      </div>
+      <nav style={{ flex: 1, padding: "14px 10px" }}>
+        {navItems.map(item => {
+          const active = view === item.id || (view === "detail" && item.id === "clients");
+          return (
+            <button key={item.id} onClick={() => { setView(item.id); onNav && onNav(); }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; } }}
+              style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 10, background: active ? C.goldAlpha : "transparent", border: active ? `1px solid ${C.goldBorder}` : "1px solid transparent", cursor: "pointer", color: active ? C.gold : C.muted, fontSize: 13, fontWeight: active ? 600 : 400, textAlign: "left", marginBottom: 4, fontFamily: "inherit", transition: "all 0.2s ease" }}>
+              <span style={{ fontSize: 16, opacity: active ? 1 : 0.7 }}>{item.icon}</span>{item.label}
+            </button>
+          );
+        })}
+      </nav>
+      <div style={{ padding: "14px 10px", borderTop: `1px solid ${C.border}` }}>
+        {saveStatus !== "idle" && <div style={{ marginBottom: 10, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
+        <SideBtn onClick={() => setChangePwOpen(true)} icon={<KeyRound size={14} strokeWidth={1.75} />} label="Changer le mot de passe" />
+      </div>
+    </>
+  );
+}
+
 export default function App() {
   const [authed, setAuthed] = useState(() => localStorage.getItem(AUTH_KEY) === "1");
   const [clients, setClients] = useState([]);
@@ -144,44 +188,6 @@ export default function App() {
     </div>
   );
 
-  const SideBtn = ({ onClick, icon, label }) => (
-    <button onClick={onClick}
-      onMouseEnter={e => { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; }}
-      onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; }}
-      style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit", marginBottom: 2, transition: "all 0.15s" }}>
-      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18 }}>{icon}</span>{label}
-    </button>
-  );
-
-  const SidebarContent = ({ onNav }) => <>
-    <div style={{ padding: "22px 18px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
-      <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.2))`, border: `1.5px solid ${C.goldBorder}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: C.shadowGold }}>
-        <span style={{ color: C.gold, fontSize: 13, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{import.meta.env.VITE_COACH_INITIALS}</span>
-      </div>
-      <div>
-        <div style={{ color: C.text, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em" }}>JELI<span style={{ color: C.gold }}>TRAINING</span></div>
-        <div style={{ color: C.muted, fontSize: 10, marginTop: 1 }}>Coach Dashboard</div>
-      </div>
-    </div>
-    <nav style={{ flex: 1, padding: "14px 10px" }}>
-      {navItems.map(item => {
-        const active = view === item.id || (view === "detail" && item.id === "clients");
-        return (
-          <button key={item.id} onClick={() => { setView(item.id); onNav && onNav(); }}
-            onMouseEnter={e => { if (!active) { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; } }}
-            onMouseLeave={e => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; } }}
-            style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 10, background: active ? C.goldAlpha : "transparent", border: active ? `1px solid ${C.goldBorder}` : "1px solid transparent", cursor: "pointer", color: active ? C.gold : C.muted, fontSize: 13, fontWeight: active ? 600 : 400, textAlign: "left", marginBottom: 4, fontFamily: "inherit", transition: "all 0.2s ease" }}>
-            <span style={{ fontSize: 16, opacity: active ? 1 : 0.7 }}>{item.icon}</span>{item.label}
-          </button>
-        );
-      })}
-    </nav>
-    <div style={{ padding: "14px 10px", borderTop: `1px solid ${C.border}` }}>
-      {saveStatus !== "idle" && <div style={{ marginBottom: 10, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
-      <SideBtn onClick={() => setChangePwOpen(true)} icon={<KeyRound size={14} strokeWidth={1.75} />} label="Changer le mot de passe" />
-    </div>
-  </>;
-
   return (
     <div style={{ minHeight: "100vh", background: C.bg, display: "flex", flexDirection: "column", fontFamily: "'Inter',system-ui,sans-serif", color: C.text }}>
       <style>{`
@@ -210,13 +216,26 @@ export default function App() {
           <div style={{ display: "flex", justifyContent: "flex-start", padding: "calc(env(safe-area-inset-top, 0px) + 12px) 14px 12px" }}>
             <button onClick={closeNav} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
           </div>
-          <SidebarContent onNav={closeNav} />
+          <SidebarContent
+            onNav={closeNav}
+            navItems={navItems}
+            view={view}
+            setView={setView}
+            saveStatus={saveStatus}
+            setChangePwOpen={setChangePwOpen}
+          />
         </div>
       </div>}
 
       <div className="app-layout" style={{ display: "flex", flex: 1 }}>
         <aside className="desktop-sidebar" style={{ display: "none", width: 230, background: `linear-gradient(180deg, ${C.s1} 0%, #0c0c0c 100%)`, borderRight: `1px solid ${C.border}`, flexDirection: "column", flexShrink: 0, minHeight: "100vh", position: "sticky", top: 0, height: "100vh", overflowY: "auto" }}>
-          <SidebarContent />
+          <SidebarContent
+            navItems={navItems}
+            view={view}
+            setView={setView}
+            saveStatus={saveStatus}
+            setChangePwOpen={setChangePwOpen}
+          />
         </aside>
         <main style={{ flex: 1, overflowY: "auto" }}>
           {view === "dashboard" && <DashboardView stats={stats} clients={clients} onSelectClient={goTo} />}

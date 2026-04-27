@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { hashPw } from "./lib.js";
 
 // Mock the Supabase password fetch so tests don't need a real network

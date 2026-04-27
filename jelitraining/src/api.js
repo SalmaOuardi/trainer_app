@@ -1,4 +1,4 @@
-import { SK, saveToStorage } from "./lib.js";
+import { SK } from "./lib.js";
 
 const SB_URL = import.meta.env.VITE_SUPABASE_URL;
 const SB_KEY = import.meta.env.VITE_SUPABASE_KEY;
@@ -54,7 +54,9 @@ export const sbGetLegacy = async () => {
 export const sbDeleteLegacy = async () => {
   try {
     await fetch(`${SB_URL}/rest/v1/store?key=eq.${SK}`, { method: "DELETE", headers });
-  } catch {}
+  } catch {
+    // Legacy key cleanup is best-effort.
+  }
 };
 
 const AVAILABILITY_KEY = "jeli-availability";

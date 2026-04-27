@@ -112,12 +112,8 @@ export function SaveBadge({ status }) {
     </span>
   );
 }
-export function typeColor(t) {
-  return { Muscu: C.gold, Cardio: "#5aaccc", Stretching: "#9a77cc", HIIT: "#cc5555", Circuit: "#5acc99", Autre: C.muted }[t] || C.muted;
-}
 export function IconText({ icon, children, gap = 6 }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap }}>{icon}{children}</span>
   );
 }
-export { iStyle };

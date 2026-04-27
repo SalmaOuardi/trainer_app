@@ -204,9 +204,9 @@ export default function App() {
         </div>
       </div>
 
-      {sideOpen && <div onClick={closeNav} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 300, animation: "fadeIn 0.15s ease" }}>
-        <div onClick={e => e.stopPropagation()} style={{ width: 260, height: "100%", background: C.s1, borderRight: `1px solid ${C.goldBorder}`, display: "flex", flexDirection: "column", boxShadow: "4px 0 20px rgba(0,0,0,0.5)" }}>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "calc(env(safe-area-inset-top, 0px) + 12px) 14px 12px" }}>
+      {sideOpen && <div onClick={closeNav} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", zIndex: 300, display: "flex", justifyContent: "flex-end", animation: "fadeIn 0.15s ease" }}>
+        <div onClick={e => e.stopPropagation()} style={{ width: 260, height: "100%", background: C.s1, borderLeft: `1px solid ${C.goldBorder}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 20px rgba(0,0,0,0.5)", animation: "slideInRight 0.2s ease-out" }}>
+          <div style={{ display: "flex", justifyContent: "flex-start", padding: "calc(env(safe-area-inset-top, 0px) + 12px) 14px 12px" }}>
             <button onClick={closeNav} style={{ background: "none", border: "none", color: C.muted, fontSize: 22, cursor: "pointer" }}>×</button>
           </div>
           <SidebarContent onNav={closeNav} />

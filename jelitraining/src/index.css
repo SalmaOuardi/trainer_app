@@ -114,6 +114,20 @@ input:focus, select:focus, textarea:focus {
   .sessions-table { font-size: 12px !important; }
   .sessions-table th, .sessions-table td { padding: 8px 10px !important; }
 
+  /* Settings → Disponibilités hebdomadaires: the 4-col [day | start | end | repos]
+     row squeezes time inputs below their iOS-native min width. Restructure to
+     2 rows: [day name | repos checkbox] on top, [start | end] below. */
+  .availability-row {
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 10px !important;
+  }
+  .availability-row > :nth-child(1) { grid-column: 1; grid-row: 1; }
+  .availability-row > :nth-child(4) { grid-column: 2; grid-row: 1; justify-self: end; }
+  .availability-row > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .availability-row > :nth-child(3) { grid-column: 2; grid-row: 2; }
+  .availability-row > input[type="time"] { padding: 8px 10px !important; font-size: 14px !important; }
+
   /* Calendar week view: stack 7 days into a vertical list with date-on-left,
      sessions-on-right. Avoids the 7-column squeeze that hid Fri/Sat/Sun off-screen. */
   .cal-week-grid { grid-template-columns: 1fr !important; gap: 8px !important; }

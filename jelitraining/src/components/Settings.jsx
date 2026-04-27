@@ -128,7 +128,7 @@ function AvailabilityCard({ availability, onSave }) {
         {DAY_KEYS.map(key => {
           const rec = draft[key];
           return (
-            <div key={key} style={{
+            <div key={key} className="availability-row" style={{
               background: C.s2, border: `1px solid ${C.border}`, borderRadius: 10,
               padding: "10px 12px",
               display: "grid",

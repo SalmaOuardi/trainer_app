@@ -126,7 +126,27 @@ input:focus, select:focus, textarea:focus {
   .availability-row > :nth-child(4) { grid-column: 2; grid-row: 1; justify-self: end; }
   .availability-row > :nth-child(2) { grid-column: 1; grid-row: 2; }
   .availability-row > :nth-child(3) { grid-column: 2; grid-row: 2; }
-  .availability-row > input[type="time"] { padding: 8px 10px !important; font-size: 14px !important; }
+  /* iOS Safari strips input chrome on type="time" by default — force visible
+     border + background so the two pickers don't blend into the row bg. */
+  .availability-row > input[type="time"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: #232323 !important;
+    border: 1px solid rgba(201, 168, 76, 0.25) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+    font-family: inherit !important;
+    color: #EFEFEF !important;
+    text-align: center !important;
+    min-height: 44px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .availability-row > input[type="time"]:disabled {
+    opacity: 0.5 !important;
+    border-color: #2a2a2a !important;
+  }
 
   /* Calendar week view: stack 7 days into a vertical list with date-on-left,
      sessions-on-right. Avoids the 7-column squeeze that hid Fri/Sat/Sun off-screen. */

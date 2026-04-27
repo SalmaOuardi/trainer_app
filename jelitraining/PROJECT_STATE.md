@@ -9,9 +9,9 @@
 ## Current status
 
 - **Branch of record:** `main`
-- **Last merged:** PR #27 — Stack calendar week view on mobile (issue #19a)
-- **Active initiative:** Mobile UX punch list (issue #19) — see section below. Currently working through #19b (Settings weekly availability rows) in PR #28.
-- **Next target after #19:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
+- **Last merged:** PR #31 — Replace UI emojis with Lucide React icons (issue #19, polish)
+- **Active initiative:** none — issue #19 (mobile UX punch list) is fully shipped. Ready to pick the next thing.
+- **Next target:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
 - **App status:** live in production, used by a real trainer. Do not break.
 - **Pending prod rollout:** `VITE_CALENDAR_ENABLED` is still `false` in Vercel Production — calendar + réglages tabs are built and shipped but not visible on the live app yet. Flip the env var + redeploy when ready to expose to the trainer.
 

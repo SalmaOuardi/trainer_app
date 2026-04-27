@@ -10,7 +10,9 @@ import {
 import { C } from "../theme.js";
 import { gid, fdate, fmoney, today } from "../utils.js";
 import { calcNutrition, ACTIVITY_LEVELS } from "../lib.js";
-import { Input, Textarea, Sel, Field, Btn, Tag, Empty, Modal, TabSection, ItemRow, IconText, typeColor } from "./ui.jsx";
+import { Input, Textarea, Sel, Field, Btn, Tag, Empty, Modal, TabSection, ItemRow, IconText } from "./ui.jsx";
+
+const typeColor = (t) => ({ Muscu: C.gold, Cardio: "#5aaccc", Stretching: "#9a77cc", HIIT: "#cc5555", Circuit: "#5acc99", Autre: C.muted }[t] || C.muted);
 
 /* ─── Weight Chart ─── */
 function WeightChart({ measurements }) {

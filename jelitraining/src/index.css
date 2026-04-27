@@ -114,6 +114,43 @@ input:focus, select:focus, textarea:focus {
   .sessions-table { font-size: 12px !important; }
   .sessions-table th, .sessions-table td { padding: 8px 10px !important; }
 
+  /* Settings → Disponibilités hebdomadaires: the 4-col [day | start | end | repos]
+     row squeezes time inputs below their iOS-native min width. Restructure to
+     2 rows: [day name | repos checkbox] on top, [start | end] below.
+     Use 1fr 1fr (not 1fr auto) so the two time inputs on the bottom row get
+     equal widths — `auto` would size col 2 to the "Repos" checkbox, leaving
+     the end-time input visibly narrower than the start-time input. */
+  .availability-row {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    row-gap: 10px !important;
+  }
+  .availability-row > :nth-child(1) { grid-column: 1; grid-row: 1; }
+  .availability-row > :nth-child(4) { grid-column: 2; grid-row: 1; justify-self: end; }
+  .availability-row > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .availability-row > :nth-child(3) { grid-column: 2; grid-row: 2; }
+  /* iOS Safari strips input chrome on type="time" by default — force visible
+     border + background so the two pickers don't blend into the row bg. */
+  .availability-row > input[type="time"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: #232323 !important;
+    border: 1px solid rgba(201, 168, 76, 0.25) !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+    font-family: inherit !important;
+    color: #EFEFEF !important;
+    text-align: center !important;
+    min-height: 44px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .availability-row > input[type="time"]:disabled {
+    opacity: 0.5 !important;
+    border-color: #2a2a2a !important;
+  }
+
   /* Calendar week view: stack 7 days into a vertical list with date-on-left,
      sessions-on-right. Avoids the 7-column squeeze that hid Fri/Sat/Sun off-screen. */
   .cal-week-grid { grid-template-columns: 1fr !important; gap: 8px !important; }

@@ -110,6 +110,45 @@ input:focus, select:focus, textarea:focus {
   .modal-body { padding: 18px !important; }
   .modal-header { padding: 14px 18px !important; }
 
+  /* Normalize form-control rendering across input types. iOS Safari renders
+     <input type="date|time|datetime-local"> and <select> with native chrome
+     that silently drops some of our padding + height, so a row of mixed
+     [date | select | number] inputs looks visually jagged in modals. Strip
+     the native chrome so all inputs render with our iStyle uniformly. */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  select {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  /* Match heights across all text-like inputs + select + textarea so they
+     align visually when stacked or placed side-by-side. */
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  select {
+    min-height: 44px !important;
+  }
+  /* Custom chevron for <select> (we just stripped the native arrow). */
+  select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3e%3cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23777' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    padding-right: 36px !important;
+  }
+
   /* Session stats in detail header wrap better */
   .sessions-table { font-size: 12px !important; }
   .sessions-table th, .sessions-table td { padding: 8px 10px !important; }

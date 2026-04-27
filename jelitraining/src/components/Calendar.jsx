@@ -239,7 +239,7 @@ function MonthView({ cursor, today, byDay, onPick }) {
 function WeekView({ cursor, today, byDay, availability, onPick }) {
   const days = weekDays(cursor);
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 6 }}>
+    <div className="cal-week-grid" style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 6 }}>
       {days.map((d, i) => {
         const key = ymd(d);
         const sessions = [...(byDay.get(key) || [])].sort(compareEvents);
@@ -250,6 +250,7 @@ function WeekView({ cursor, today, byDay, availability, onPick }) {
         return (
           <button
             key={i}
+            className="cal-day-cell"
             onClick={() => onPick(d)}
             style={{
               background: isToday ? C.goldAlpha : C.s1,
@@ -264,7 +265,7 @@ function WeekView({ cursor, today, byDay, availability, onPick }) {
             onMouseEnter={e => { if (!isToday) e.currentTarget.style.background = C.s2; }}
             onMouseLeave={e => { if (!isToday) e.currentTarget.style.background = C.s1; }}
           >
-            <div style={{ textAlign: "center" }}>
+            <div className="cal-day-header" style={{ textAlign: "center" }}>
               <div style={{ fontSize: 9, color: C.muted, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{WEEKDAY_SHORT_FR[i]}</div>
               <div style={{ fontSize: 18, fontWeight: isToday ? 700 : 500, color: isToday ? C.gold : C.text, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>{d.getDate()}</div>
               {avail && (
@@ -273,7 +274,7 @@ function WeekView({ cursor, today, byDay, availability, onPick }) {
                 </div>
               )}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 3, overflow: "hidden" }}>
+            <div className="cal-day-sessions" style={{ display: "flex", flexDirection: "column", gap: 3, overflow: "hidden", minWidth: 0, flex: 1 }}>
               {sessions.slice(0, 4).map((s, j) => (
                 <div key={j} style={{
                   background: `${colorForType(s.type)}22`,

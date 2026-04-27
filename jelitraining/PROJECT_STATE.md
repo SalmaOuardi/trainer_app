@@ -9,8 +9,9 @@
 ## Current status
 
 - **Branch of record:** `main`
-- **Last merged:** PR #22 — Polish email template, logo, brand colors, WhatsApp contact (Phase 3b.2)
-- **Next target:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
+- **Last merged:** PR #27 — Stack calendar week view on mobile (issue #19a)
+- **Active initiative:** Mobile UX punch list (issue #19) — see section below. Currently working through #19b (Settings weekly availability rows) in PR #28.
+- **Next target after #19:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
 - **App status:** live in production, used by a real trainer. Do not break.
 - **Pending prod rollout:** `VITE_CALENDAR_ENABLED` is still `false` in Vercel Production — calendar + réglages tabs are built and shipped but not visible on the live app yet. Flip the env var + redeploy when ready to expose to the trainer.
 
@@ -27,9 +28,22 @@
 | 3a | Manual "Send invite" button + `api/send-invite.js` (Resend, HTML + `.ics`) | ✅ merged | #16 |
 | 3b.1 | Extract template module + plain-text fallback + Reply-To support | ✅ merged | #21 |
 | 3b.2 | Visual + copy polish: logo, brand colors, emoji icons, WhatsApp contact | ✅ merged | #22 |
-| 3c.1 | Bulk resend (one click → invites for all upcoming sessions of a client) | 💭 next | — |
+| 3c.1 | Bulk resend (one click → invites for all upcoming sessions of a client) | 💭 next (after #19) | — |
 | 3c.2 | Auto-send on event create (with safety guards: ≥ tomorrow, opt-in toggle) | 💭 later | — |
 | later | Recurring events, reminders, client view | 💭 not planned | — |
+
+---
+
+## Mobile UX punch list (issue #19)
+
+The trainer flagged 4 specific mobile bugs. Each is its own micro-PR.
+
+| Sub | Scope | Status | PR |
+|---|---|---|---|
+| 19a | Calendar week view: stack 7 days as vertical list on mobile (was overflowing off-screen) | ✅ merged | #27 |
+| 19b | Settings → Disponibilités hebdomadaires: 2-row layout per day on mobile + force visible chrome on iOS time inputs | 🚧 open | #28 |
+| 19c | "Ajouter" / view-session modals: inconsistent input box sizes, poor padding | 💭 next | — |
+| 19d | Client list emoji refresh (`✉ / 📱 / 🎂` feel unprofessional) | 💭 polish, ship last | — |
 
 ---
 
@@ -68,6 +82,7 @@ Everything persists to a single Supabase `store` table (key-value). Known keys:
 - `api/ical.js` — iPhone `.ics` feed. Token-gated via `VITE_ICAL_FEED_TOKEN` query param.
 - `api/send-invite.js` — Resend-backed client invite. POST `{ clientId, sessionId, token }`, server looks up client + session in Supabase and emails the stored address with an `.ics` attachment. Email body is built in `src/email-template.js` (importable + unit-tested).
 - **Invite endpoint security:** the function takes `{ clientId, sessionId, token }` — never a user-supplied email. Server reads the stored email from Supabase, so a leaked token can't fan out to arbitrary recipients.
+- **Trainer notes are private.** `session.notes` is never included in the client-facing email body OR the `.ics` DESCRIPTION field — they're trainer planning notes (e.g. "knee — go easy"). Notes still appear in the trainer's own iPhone subscription feed via `api/ical.js`.
 - ESLint: `api/**/*.js` is treated as Node globals (see `eslint.config.js` override).
 - **Gotcha:** Vercel Preview Protection gates `/api/*` behind SSO — external clients (iOS subscription, `curl`) fail on Preview URLs until protection is toggled off in project settings. Test serverless endpoints on production or toggle protection temporarily. ([memory note](~/.claude/projects/-Users-salmaouardi-conductor-repos-trainer-app/memory/project_vercel_preview_protection.md))
 

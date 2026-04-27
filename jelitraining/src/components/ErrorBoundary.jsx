@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { AlertTriangle } from "lucide-react";
 import { C } from "../theme.js";
 
 export class ErrorBoundary extends Component {
@@ -16,7 +17,9 @@ export class ErrorBoundary extends Component {
     return (
       <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Inter',system-ui,sans-serif" }}>
         <div style={{ width: "100%", maxWidth: 420, textAlign: "center" }}>
-          <div style={{ fontSize: 48, marginBottom: 20 }}>⚠️</div>
+          <div style={{ marginBottom: 20, display: "flex", justifyContent: "center" }}>
+            <AlertTriangle size={48} strokeWidth={1.5} color={C.orange} />
+          </div>
           <div style={{ color: C.text, fontWeight: 700, fontSize: 20, fontFamily: "'Cormorant Garamond',Georgia,serif", marginBottom: 10 }}>
             Une erreur est survenue
           </div>

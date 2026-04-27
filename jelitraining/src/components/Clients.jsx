@@ -1,3 +1,4 @@
+import { Search, Users } from "lucide-react";
 import { C } from "../theme.js";
 import { fmoney } from "../utils.js";
 import { Input, Btn, Tag, Empty } from "./ui.jsx";
@@ -19,9 +20,12 @@ export function ClientsView({ clients, search, onSearch, onSelect, onAdd }) {
         </div>
         <Btn onClick={onAdd}>+ Nouveau client</Btn>
       </div>
-      <Input value={search} onChange={e => onSearch(e.target.value)} placeholder="🔍  Rechercher un client…" style={{ maxWidth: 400, marginBottom: 24 }} />
+      <div style={{ position: "relative", maxWidth: 400, marginBottom: 24 }}>
+        <Search size={16} strokeWidth={1.75} color={C.muted} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+        <Input value={search} onChange={e => onSearch(e.target.value)} placeholder="Rechercher un client…" style={{ paddingLeft: 40 }} />
+      </div>
       {filtered.length === 0
-        ? <Empty icon="👥" text={search ? "Aucun client correspondant" : "Aucun client — ajoutez votre premier !"} />
+        ? <Empty icon={<Users size={36} strokeWidth={1.5} />} text={search ? "Aucun client correspondant" : "Aucun client — ajoutez votre premier !"} />
         : <div style={{ display: "grid", gap: 12 }}>
             {filtered.map((c, idx) => {
               const paid = (c.payments || []).filter(p => p.status === "payé").reduce((s, p) => s + Number(p.amount), 0);

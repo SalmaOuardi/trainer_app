@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { KeyRound } from "lucide-react";
 import { C } from "./theme.js";
 import { gid } from "./utils.js";
 import { loadFromStorage, saveToStorage } from "./lib.js";
@@ -130,7 +131,7 @@ export default function App() {
     { id: "dashboard", icon: "◈", label: "Dashboard" },
     { id: "clients", icon: "◉", label: "Mes clients" },
     ...(CALENDAR_ENABLED ? [{ id: "calendar", icon: "◐", label: "Calendrier" }] : []),
-    ...(CALENDAR_ENABLED ? [{ id: "settings", icon: "⚙", label: "Réglages" }] : []),
+    ...(CALENDAR_ENABLED ? [{ id: "settings", icon: "⚙︎", label: "Réglages" }] : []),
   ];
   const closeNav = () => setSideOpen(false);
 
@@ -148,7 +149,7 @@ export default function App() {
       onMouseEnter={e => { e.currentTarget.style.background = C.s3; e.currentTarget.style.color = C.text; }}
       onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.muted; }}
       style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", borderRadius: 8, background: "transparent", border: "none", cursor: "pointer", color: C.muted, fontSize: 12, fontFamily: "inherit", marginBottom: 2, transition: "all 0.15s" }}>
-      <span style={{ fontSize: 14 }}>{icon}</span>{label}
+      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18 }}>{icon}</span>{label}
     </button>
   );
 
@@ -177,7 +178,7 @@ export default function App() {
     </nav>
     <div style={{ padding: "14px 10px", borderTop: `1px solid ${C.border}` }}>
       {saveStatus !== "idle" && <div style={{ marginBottom: 10, paddingLeft: 4 }}><SaveBadge status={saveStatus} /></div>}
-      <SideBtn onClick={() => setChangePwOpen(true)} icon="🔑" label="Changer le mot de passe" />
+      <SideBtn onClick={() => setChangePwOpen(true)} icon={<KeyRound size={14} strokeWidth={1.75} />} label="Changer le mot de passe" />
     </div>
   </>;
 

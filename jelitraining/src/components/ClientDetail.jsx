@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import {
+  TrendingUp, BarChart3, Pencil, Scale, Flame, Dumbbell, Lightbulb,
+  Beef, Droplet, Utensils, Zap, AlertTriangle, Save, FileText, Library,
+  Target, Package, Send, MessageCircle, MessageSquare, Clipboard,
+  ClipboardCheck, Megaphone, Mail, Phone, Cake, Calendar, CreditCard,
+  Ruler, Check,
+} from "lucide-react";
 import { C } from "../theme.js";
 import { gid, fdate, fmoney, today } from "../utils.js";
 import { calcNutrition, ACTIVITY_LEVELS } from "../lib.js";
-import { Input, Textarea, Sel, Field, Btn, Tag, Empty, Modal, TabSection, ItemRow, typeColor } from "./ui.jsx";
+import { Input, Textarea, Sel, Field, Btn, Tag, Empty, Modal, TabSection, ItemRow, IconText, typeColor } from "./ui.jsx";
 
 /* ─── Weight Chart ─── */
 function WeightChart({ measurements }) {
@@ -17,7 +24,9 @@ function WeightChart({ measurements }) {
   return (
     <div style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${C.border}`, borderRadius: 14, padding: "22px 20px", marginBottom: 24, boxShadow: C.shadow1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-        <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>📊 Évolution du poids</span>
+        <IconText icon={<TrendingUp size={15} strokeWidth={1.75} color={C.gold} />}>
+          <span style={{ color: C.text, fontWeight: 600, fontSize: 14 }}>Évolution du poids</span>
+        </IconText>
         <span style={{ color: diffColor, fontWeight: 700, fontSize: 13, background: `${diffColor}18`, padding: "4px 12px", borderRadius: 20, border: `1px solid ${diffColor}44` }}>
           {diff > 0 ? "+" : ""}{diff.toFixed(1)} kg
         </span>
@@ -53,7 +62,7 @@ function MacroBar({ prot, lip, gluc }) {
   );
 }
 
-function NutritionCard({ label, emoji, data, accent, note }) {
+function NutritionCard({ label, icon, data, accent, note }) {
   return (
     <div
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = C.shadow2; }}
@@ -61,7 +70,9 @@ function NutritionCard({ label, emoji, data, accent, note }) {
       style={{ background: `linear-gradient(135deg, ${C.s2}, ${C.s1})`, border: `1px solid ${accent ? C.goldBorder : C.border}`, borderRadius: 14, padding: "18px 20px", transition: "all 0.25s ease", boxShadow: C.shadow1 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div>
-          <div style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{emoji} {label}</div>
+          <IconText icon={icon} gap={7}>
+            <span style={{ color: C.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
+          </IconText>
           <div style={{ color: accent ? C.gold : C.text, fontSize: 26, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif", marginTop: 4 }}>{data.cal} <span style={{ fontSize: 14, fontWeight: 400 }}>kcal</span></div>
         </div>
         {note && <span style={{ background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, color: C.gold, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>{note}</span>}
@@ -75,9 +86,11 @@ function AnalyseTab({ client, onEdit }) {
   const n = calcNutrition(client);
   if (!n) return (
     <div style={{ textAlign: "center", padding: "48px 20px" }}>
-      <div style={{ fontSize: 40, marginBottom: 16 }}>📊</div>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+        <BarChart3 size={40} strokeWidth={1.5} color={C.muted} />
+      </div>
       <p style={{ color: C.muted, marginBottom: 20, lineHeight: 1.7 }}>Les données physiques sont incomplètes.<br />Renseigne le poids, la taille et l'âge pour générer l'analyse.</p>
-      <Btn onClick={onEdit}>✏️ Compléter le profil</Btn>
+      <Btn onClick={onEdit}><IconText icon={<Pencil size={13} strokeWidth={2} />}>Compléter le profil</IconText></Btn>
     </div>
   );
   return (
@@ -89,19 +102,25 @@ function AnalyseTab({ client, onEdit }) {
       </div>
       <div style={{ color: C.gold, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Objectifs caloriques & macros</div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 14, marginBottom: 22 }}>
-        <NutritionCard label="Maintien calorique" emoji="⚖️" data={n.maintien} accent note="Référence" />
-        <NutritionCard label="Perte de masse grasse" emoji="🔥" data={n.perteMG} note="-400 kcal" />
-        <NutritionCard label="Prise de masse" emoji="💪" data={n.priseMasse} note="+300 kcal" />
+        <NutritionCard label="Maintien calorique" icon={<Scale size={13} strokeWidth={1.75} color={C.gold} />} data={n.maintien} accent note="Référence" />
+        <NutritionCard label="Perte de masse grasse" icon={<Flame size={13} strokeWidth={1.75} color="#cc8833" />} data={n.perteMG} note="-400 kcal" />
+        <NutritionCard label="Prise de masse" icon={<Dumbbell size={13} strokeWidth={1.75} color={C.muted} />} data={n.priseMasse} note="+300 kcal" />
       </div>
       <div style={{ background: `linear-gradient(135deg, ${C.goldAlpha}, rgba(201,168,76,0.06))`, border: `1px solid ${C.goldBorder}`, borderRadius: 14, padding: "18px 20px", boxShadow: `0 4px 16px rgba(201,168,76,0.08)` }}>
-        <div style={{ color: C.gold, fontWeight: 700, fontSize: 12, marginBottom: 12, letterSpacing: "0.02em" }}>💡 Recommandations personnalisées</div>
+        <div style={{ color: C.gold, fontWeight: 700, fontSize: 12, marginBottom: 12, letterSpacing: "0.02em", display: "inline-flex", alignItems: "center", gap: 7 }}>
+          <Lightbulb size={13} strokeWidth={1.75} /> Recommandations personnalisées
+        </div>
         {[
-          `🥩 Protéines cibles : ${Math.round(n.poids * 2)}g/jour (2g par kg de poids corporel)`,
-          `💧 Hydratation : ${(n.poids * 0.035).toFixed(1)}L d'eau/jour minimum`,
-          `🍽️ Répartition sur ${client.mealsPerDay || 3} repas : ~${Math.round(n.maintien.cal / (client.mealsPerDay || 3))} kcal par repas (maintien)`,
-          `⚡ Calcul basé sur la formule Mifflin-St Jeor · Niveau d'activité : ${n.actLabel}`,
-          client.restrictions ? `⚠️ Restrictions / infos médicales : ${client.restrictions}` : null,
-        ].filter(Boolean).map((t, i) => <div key={i} style={{ color: C.text, fontSize: 13, marginBottom: 6 }}>{t}</div>)}
+          { icon: <Beef size={13} strokeWidth={1.75} color={C.muted} />, text: `Protéines cibles : ${Math.round(n.poids * 2)}g/jour (2g par kg de poids corporel)` },
+          { icon: <Droplet size={13} strokeWidth={1.75} color={C.muted} />, text: `Hydratation : ${(n.poids * 0.035).toFixed(1)}L d'eau/jour minimum` },
+          { icon: <Utensils size={13} strokeWidth={1.75} color={C.muted} />, text: `Répartition sur ${client.mealsPerDay || 3} repas : ~${Math.round(n.maintien.cal / (client.mealsPerDay || 3))} kcal par repas (maintien)` },
+          { icon: <Zap size={13} strokeWidth={1.75} color={C.muted} />, text: `Calcul basé sur la formule Mifflin-St Jeor · Niveau d'activité : ${n.actLabel}` },
+          client.restrictions ? { icon: <AlertTriangle size={13} strokeWidth={1.75} color={C.orange} />, text: `Restrictions / infos médicales : ${client.restrictions}` } : null,
+        ].filter(Boolean).map((r, i) => (
+          <div key={i} style={{ color: C.text, fontSize: 13, marginBottom: 6, display: "flex", alignItems: "flex-start", gap: 8 }}>
+            <span style={{ marginTop: 3, flexShrink: 0 }}>{r.icon}</span>{r.text}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -159,8 +178,12 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 10 }}>
         <h3 style={{ color: C.text, fontSize: 15, fontWeight: 600, margin: 0 }}>Générateur de programme</h3>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <Btn variant="ghost" onClick={() => { if (onSave) onSave({ ...prog, savedAt: today(), source: "manuel" }); alert("Programme sauvegardé dans la fiche client ✓"); }}>💾 Sauvegarder</Btn>
-          <Btn onClick={generatePDF}>📄 Générer PDF</Btn>
+          <Btn variant="ghost" onClick={() => { if (onSave) onSave({ ...prog, savedAt: today(), source: "manuel" }); alert("Programme sauvegardé dans la fiche client ✓"); }}>
+            <IconText icon={<Save size={13} strokeWidth={2} />}>Sauvegarder</IconText>
+          </Btn>
+          <Btn onClick={generatePDF}>
+            <IconText icon={<FileText size={13} strokeWidth={2} />}>Générer PDF</IconText>
+          </Btn>
         </div>
       </div>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
@@ -194,12 +217,17 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
       </div>
       <Field label="Retour au calme"><Input value={prog.cooldown} onChange={setP("cooldown")} /></Field>
       <div style={{ background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, borderRadius: 10, padding: "12px 16px", marginTop: 4 }}>
-        <p style={{ color: C.gold, fontSize: 12, margin: 0 }}>💡 Le PDF s'ouvrira dans un nouvel onglet — tu peux l'imprimer ou le sauvegarder directement.</p>
+        <div style={{ color: C.gold, fontSize: 12, display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <Lightbulb size={13} strokeWidth={1.75} style={{ marginTop: 2, flexShrink: 0 }} />
+          <p style={{ margin: 0 }}>Le PDF s'ouvrira dans un nouvel onglet — tu peux l'imprimer ou le sauvegarder directement.</p>
+        </div>
       </div>
       {savedProgrammes.length > 0 && (
         <div style={{ marginTop: 32 }}>
           <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 24, marginBottom: 16 }}>
-            <div style={{ color: C.gold, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>📚 Programmes sauvegardés ({savedProgrammes.length})</div>
+            <div style={{ color: C.gold, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 7 }}>
+              <Library size={13} strokeWidth={1.75} /> Programmes sauvegardés ({savedProgrammes.length})
+            </div>
           </div>
           {[...savedProgrammes].sort((a, b) => b.savedAt > a.savedAt ? 1 : -1).map(sp => (
             <div key={sp.id} style={{ background: C.s2, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 18px", marginBottom: 10, display: "flex", alignItems: "flex-start", gap: 14 }}>
@@ -209,7 +237,7 @@ function ProgrammeTab({ client, savedProgrammes = [], onSave, onRemove }) {
                   <span style={{ color: C.muted, fontSize: 11 }}>Sauvegardé le {fdate(sp.savedAt)}</span>
                 </div>
                 <div style={{ color: C.muted, fontSize: 12 }}>{sp.exercises?.length || 0} exercices · {sp.duration} sem. · {sp.days} j/sem · {sp.level}</div>
-                {sp.goal && <div style={{ color: C.muted, fontSize: 12 }}>🎯 {sp.goal}</div>}
+                {sp.goal && <IconText icon={<Target size={12} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 12 }}>{sp.goal}</span></IconText>}
               </div>
               <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
                 <Btn variant="outline" onClick={() => setProg({ ...sp })} style={{ padding: "6px 12px", fontSize: 12 }}>Charger</Btn>
@@ -233,7 +261,7 @@ function PacksTab({ client, onAdd, mutations }) {
         <h3 style={{ color: C.text, fontSize: 15, fontWeight: 600, margin: 0 }}>Suivi des packs</h3>
         <Btn onClick={onAdd}>+ Nouveau pack</Btn>
       </div>
-      {packs.length === 0 ? <Empty icon="📦" text="Aucun pack enregistré — ajoute le premier !" /> :
+      {packs.length === 0 ? <Empty icon={<Package size={36} strokeWidth={1.5} />} text="Aucun pack enregistré — ajoute le premier !" /> :
         packs.map(pack => {
           const used = pack.manualUsed != null ? pack.manualUsed : sessions.filter(s => s.date >= pack.startDate).length;
           const total = parseInt(pack.totalSessions) || 0;
@@ -266,8 +294,12 @@ function PacksTab({ client, onAdd, mutations }) {
                   <button onClick={() => mutations.updatePack(pack.id, { manualUsed: Math.min(total, (pack.manualUsed ?? used) + 1) })} style={{ background: C.s3, border: `1px solid ${C.border}`, borderRadius: 6, padding: "4px 10px", color: C.gold, cursor: "pointer", fontSize: 16, fontFamily: "inherit" }}>+</button>
                 </div>
               </div>
-              {remaining === 0 && <div style={{ marginTop: 10, background: C.redAlpha, border: "1px solid rgba(204,68,68,0.3)", borderRadius: 8, padding: "8px 12px", color: C.red, fontSize: 12, fontWeight: 600 }}>⚠ Pack épuisé — pense à proposer un renouvellement !</div>}
-              {remaining === 2 && <div style={{ marginTop: 10, background: C.orangeAlpha, border: "1px solid rgba(204,136,51,0.3)", borderRadius: 8, padding: "8px 12px", color: C.orange, fontSize: 12, fontWeight: 600 }}>📣 Plus que 2 séances — anticipe le renouvellement !</div>}
+              {remaining === 0 && <div style={{ marginTop: 10, background: C.redAlpha, border: "1px solid rgba(204,68,68,0.3)", borderRadius: 8, padding: "8px 12px", color: C.red, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <AlertTriangle size={14} strokeWidth={2} /> Pack épuisé — pense à proposer un renouvellement !
+              </div>}
+              {remaining === 2 && <div style={{ marginTop: 10, background: C.orangeAlpha, border: "1px solid rgba(204,136,51,0.3)", borderRadius: 8, padding: "8px 12px", color: C.orange, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <Megaphone size={14} strokeWidth={2} /> Plus que 2 séances — anticipe le renouvellement !
+              </div>}
             </div>
           );
         })
@@ -290,7 +322,7 @@ function AddPackModal({ onClose, onSave }) {
     onSave(f);
   };
   return (
-    <Modal title="📦 NOUVEAU PACK" onClose={onClose}>
+    <Modal title={<IconText icon={<Package size={14} strokeWidth={2} />}>NOUVEAU PACK</IconText>} onClose={onClose}>
       <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
         {presets.map(pr => (
           <button key={pr.l} onClick={() => { setF(p => ({ ...p, name: `Pack ${pr.s} séances`, totalSessions: pr.s, price: pr.p })); setErr(""); }}
@@ -322,7 +354,7 @@ function RelanceModal({ client, pendingPayments, onClose }) {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText(msg); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
-    <Modal title="📩 RELANCE IMPAYÉ" onClose={onClose} width={560}>
+    <Modal title={<IconText icon={<Send size={14} strokeWidth={2} />}>RELANCE IMPAYÉ</IconText>} onClose={onClose} width={560}>
       <div style={{ background: C.orangeAlpha, border: "1px solid rgba(204,136,51,0.35)", borderRadius: 10, padding: "12px 18px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>Impayé de <strong>{client.firstName} {client.lastName}</strong></div>
@@ -335,16 +367,22 @@ function RelanceModal({ client, pendingPayments, onClose }) {
       </Field>
       <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 8 }}>
         {client.phone && <a href={`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-          <button style={{ width: "100%", padding: "11px 0", borderRadius: 8, background: "#25D366", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>📱 WhatsApp</button>
+          <button style={{ width: "100%", padding: "11px 0", borderRadius: 8, background: "#25D366", border: "none", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+            <MessageCircle size={14} strokeWidth={2} /> WhatsApp
+          </button>
         </a>}
         {client.phone && <a href={`sms:${client.phone}?body=${encodeURIComponent(msg)}`} style={{ textDecoration: "none" }}>
-          <button style={{ width: "100%", padding: "11px 0", borderRadius: 8, background: C.s3, border: `1px solid ${C.border}`, color: C.text, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>💬 SMS</button>
+          <button style={{ width: "100%", padding: "11px 0", borderRadius: 8, background: C.s3, border: `1px solid ${C.border}`, color: C.text, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+            <MessageSquare size={14} strokeWidth={2} /> SMS
+          </button>
         </a>}
-        <button onClick={copy} style={{ padding: "11px 0", borderRadius: 8, background: copied ? C.greenAlpha : C.s3, border: `1px solid ${copied ? C.green : C.border}`, color: copied ? C.green : C.text, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s" }}>
-          {copied ? "✓ Copié !" : "📋 Copier"}
+        <button onClick={copy} style={{ padding: "11px 0", borderRadius: 8, background: copied ? C.greenAlpha : C.s3, border: `1px solid ${copied ? C.green : C.border}`, color: copied ? C.green : C.text, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 7 }}>
+          {copied ? <><ClipboardCheck size={14} strokeWidth={2} /> Copié !</> : <><Clipboard size={14} strokeWidth={2} /> Copier</>}
         </button>
       </div>
-      {!client.phone && <p style={{ color: C.orange, fontSize: 12, marginTop: 12, background: C.orangeAlpha, borderRadius: 8, padding: "8px 12px" }}>⚠ Aucun numéro renseigné — utilise le bouton Copier.</p>}
+      {!client.phone && <div style={{ color: C.orange, fontSize: 12, marginTop: 12, background: C.orangeAlpha, borderRadius: 8, padding: "8px 12px", display: "flex", alignItems: "center", gap: 8 }}>
+        <AlertTriangle size={13} strokeWidth={2} /> Aucun numéro renseigné — utilise le bouton Copier.
+      </div>}
     </Modal>
   );
 }
@@ -383,7 +421,9 @@ export function ClientFormModal({ title, initial, onClose, onSave }) {
       <Field label="Restrictions / infos médicales"><Input value={f.restrictions || ""} onChange={set("restrictions")} placeholder="Allergies, blessures…" /></Field>
       {preview && (
         <div style={{ background: C.goldAlpha, border: `1px solid ${C.goldBorder}`, borderRadius: 10, padding: "12px 16px", marginBottom: 8 }}>
-          <div style={{ color: C.gold, fontSize: 11, fontWeight: 700, marginBottom: 8 }}>⚡ Aperçu nutritionnel calculé</div>
+          <div style={{ color: C.gold, fontSize: 11, fontWeight: 700, marginBottom: 8, display: "inline-flex", alignItems: "center", gap: 7 }}>
+            <Zap size={12} strokeWidth={1.75} /> Aperçu nutritionnel calculé
+          </div>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {[{ l: "Maintien", v: preview.maintien.cal }, { l: "Perte MG", v: preview.perteMG.cal }, { l: "Prise masse", v: preview.priseMasse.cal }].map(i => (
               <div key={i.l}><div style={{ color: C.muted, fontSize: 10 }}>{i.l}</div><div style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{i.v} <span style={{ color: C.muted, fontSize: 11, fontWeight: 400 }}>kcal</span></div></div>
@@ -530,7 +570,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
     { id: "payments", label: "Paiements", count: payments.length, alert: pendingPayments.length > 0 },
     { id: "packs", label: "Packs", count: packs.length, alert: packsAlert },
     { id: "programme", label: "Programme", count: programmes.length || null },
-    { id: "analyse", label: "Analyse 📊", count: null },
+    { id: "analyse", label: <IconText icon={<BarChart3 size={13} strokeWidth={1.75} />}>Analyse</IconText>, count: null },
   ];
 
   return (
@@ -549,20 +589,24 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
             <div>
               <h2 style={{ color: C.text, fontSize: 22, fontWeight: 700, margin: "0 0 8px", fontFamily: "'Cormorant Garamond',Georgia,serif", letterSpacing: "-0.01em" }}>{client.firstName} {client.lastName}</h2>
               <div className="detail-meta" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                {client.email && <span style={{ color: C.muted, fontSize: 12 }}>✉ {client.email}</span>}
-                {client.phone && <span style={{ color: C.muted, fontSize: 12 }}>📱 {client.phone}</span>}
-                {client.age && <span style={{ color: C.muted, fontSize: 12 }}>🎂 {client.age} ans</span>}
-                {client.startDate && <span style={{ color: C.muted, fontSize: 12 }}>📅 Depuis {fdate(client.startDate)}</span>}
+                {client.email && <IconText icon={<Mail size={12} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 12 }}>{client.email}</span></IconText>}
+                {client.phone && <IconText icon={<Phone size={12} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 12 }}>{client.phone}</span></IconText>}
+                {client.age && <IconText icon={<Cake size={12} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 12 }}>{client.age} ans</span></IconText>}
+                {client.startDate && <IconText icon={<Calendar size={12} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 12 }}>Depuis {fdate(client.startDate)}</span></IconText>}
               </div>
-              {client.goal && <div style={{ color: C.gold, fontSize: 12, marginTop: 7 }}>🎯 {client.goal}</div>}
+              {client.goal && <div style={{ marginTop: 7 }}><IconText icon={<Target size={13} strokeWidth={1.75} color={C.gold} />}><span style={{ color: C.gold, fontSize: 12 }}>{client.goal}</span></IconText></div>}
             </div>
           </div>
           <div className="detail-actions" style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, flexWrap: "wrap" }}>
-            {pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>📩 Relance impayé</Btn>}
+            {pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>
+              <IconText icon={<Send size={13} strokeWidth={2} />}>Relance impayé</IconText>
+            </Btn>}
             <Sel value={client.status || "actif"} onChange={e => mutations.updateStatus(e.target.value)} style={{ width: "auto", padding: "7px 12px", fontSize: 12 }}>
               <option value="actif">Actif</option><option value="inactif">Inactif</option>
             </Sel>
-            <Btn variant="ghost" onClick={() => setEditOpen(true)}>✏️ Modifier</Btn>
+            <Btn variant="ghost" onClick={() => setEditOpen(true)}>
+              <IconText icon={<Pencil size={13} strokeWidth={2} />}>Modifier</IconText>
+            </Btn>
             <Btn variant="danger" onClick={() => { if (window.confirm(`Supprimer ${client.firstName} ${client.lastName} ?`)) mutations.delete(); }}>Supprimer</Btn>
           </div>
         </div>
@@ -588,7 +632,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
 
       <div className="detail-content" style={{ padding: "32px 44px" }}>
         {tab === "sessions" && <TabSection title="Historique des séances" onAdd={handlers.addSession}>
-          {sessions.length === 0 ? <Empty icon="🏋️" text="Aucune séance enregistrée" /> :
+          {sessions.length === 0 ? <Empty icon={<Dumbbell size={36} strokeWidth={1.5} />} text="Aucune séance enregistrée" /> :
             [...sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).map(s => (
               <ItemRow key={s.id}
                 left={<div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -605,7 +649,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
 
         {tab === "measurements" && <TabSection title="Mensurations & poids" onAdd={handlers.addMeasurement}>
           <WeightChart measurements={measurements} />
-          {measurements.length === 0 ? <Empty icon="📏" text="Aucune mensuration enregistrée" /> :
+          {measurements.length === 0 ? <Empty icon={<Ruler size={36} strokeWidth={1.5} />} text="Aucune mensuration enregistrée" /> :
             <div style={{ overflowX: "auto", background: C.s1, borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: C.shadow1 }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead><tr style={{ borderBottom: `1px solid ${C.border}` }}>
@@ -631,7 +675,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         </TabSection>}
 
         {tab === "goals" && <TabSection title="Objectifs & progression" onAdd={handlers.addGoal}>
-          {goals.length === 0 ? <Empty icon="🎯" text="Aucun objectif défini" /> :
+          {goals.length === 0 ? <Empty icon={<Target size={36} strokeWidth={1.5} />} text="Aucun objectif défini" /> :
             goals.map(g => (
               <div key={g.id} style={{ background: C.s2, border: `1px solid ${g.completed ? C.goldBorder : C.border}`, borderRadius: 12, padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 12, transition: "all 0.2s ease" }}
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = C.shadow1; }}
@@ -643,7 +687,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
                 <div style={{ flex: 1 }}>
                   <div style={{ color: g.completed ? C.muted : C.text, fontWeight: 600, textDecoration: g.completed ? "line-through" : "none" }}>{g.title}</div>
                   {g.description && <div style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>{g.description}</div>}
-                  {g.targetDate && <div style={{ color: C.muted, fontSize: 11, marginTop: 6 }}>📅 Cible : {fdate(g.targetDate)}</div>}
+                  {g.targetDate && <div style={{ marginTop: 6 }}><IconText icon={<Calendar size={11} strokeWidth={1.75} color={C.muted} />}><span style={{ color: C.muted, fontSize: 11 }}>Cible : {fdate(g.targetDate)}</span></IconText></div>}
                 </div>
                 <button onClick={() => { if (window.confirm("Supprimer ?")) mutations.removeGoal(g.id); }} style={{ background: "none", border: "none", color: C.red, cursor: "pointer", opacity: 0.55, fontSize: 14 }}>✕</button>
               </div>
@@ -652,7 +696,9 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         </TabSection>}
 
         {tab === "payments" && <TabSection title="Paiements & factures" onAdd={handlers.addPayment}
-          extra={pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>📩 Envoyer relance</Btn>}
+          extra={pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>
+            <IconText icon={<Send size={13} strokeWidth={2} />}>Envoyer relance</IconText>
+          </Btn>}
         >
           <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
             {[{ label: "Encaissé", val: fmoney(totalPaid), color: C.green }, { label: "En attente", val: fmoney(pendingAmt), color: C.orange }].map(s => (
@@ -662,7 +708,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
               </div>
             ))}
           </div>
-          {payments.length === 0 ? <Empty icon="💳" text="Aucun paiement enregistré" /> :
+          {payments.length === 0 ? <Empty icon={<CreditCard size={36} strokeWidth={1.5} />} text="Aucun paiement enregistré" /> :
             [...payments].sort((a, b) => new Date(b.date) - new Date(a.date)).map(p => (
               <ItemRow key={p.id}
                 left={<div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
@@ -689,7 +735,7 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
         {tab === "analyse" && <AnalyseTab client={client} onEdit={() => setEditOpen(true)} />}
       </div>
 
-      {editOpen && <ClientFormModal title="✏️ MODIFIER LE PROFIL" initial={client} onClose={() => setEditOpen(false)} onSave={d => { mutations.updateProfile(d); setEditOpen(false); }} />}
+      {editOpen && <ClientFormModal title={<IconText icon={<Pencil size={13} strokeWidth={2} />}>MODIFIER LE PROFIL</IconText>} initial={client} onClose={() => setEditOpen(false)} onSave={d => { mutations.updateProfile(d); setEditOpen(false); }} />}
       {handlers.modal === "session" && <AddSessionModal onClose={handlers.closeModal} onSave={handlers.saveSession} />}
       {handlers.modal === "measurement" && <AddMeasurementModal onClose={handlers.closeModal} onSave={handlers.saveMeasurement} />}
       {handlers.modal === "goal" && <AddGoalModal onClose={handlers.closeModal} onSave={handlers.saveGoal} />}

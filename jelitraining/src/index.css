@@ -113,6 +113,28 @@ input:focus, select:focus, textarea:focus {
   /* Session stats in detail header wrap better */
   .sessions-table { font-size: 12px !important; }
   .sessions-table th, .sessions-table td { padding: 8px 10px !important; }
+
+  /* Calendar week view: stack 7 days into a vertical list with date-on-left,
+     sessions-on-right. Avoids the 7-column squeeze that hid Fri/Sat/Sun off-screen. */
+  .cal-week-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+  .cal-day-cell {
+    flex-direction: row !important;
+    align-items: stretch !important;
+    min-height: 64px !important;
+    padding: 12px 14px !important;
+    gap: 14px !important;
+  }
+  .cal-day-header {
+    flex: 0 0 56px !important;
+    text-align: center !important;
+    border-right: 1px solid #2a2a2a !important;
+    padding-right: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+  .cal-day-header > div:nth-child(2) { font-size: 22px !important; }
+  .cal-day-sessions { justify-content: center !important; }
 }
 
 p { margin: 0; }

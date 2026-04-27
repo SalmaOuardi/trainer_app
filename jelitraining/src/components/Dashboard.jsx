@@ -27,7 +27,7 @@ export function DashboardView({ stats, clients, onSelectClient }) {
     <div className="page" style={{ padding: "40px 44px", maxWidth: 1100 }}>
       <div className="page-header" style={{ marginBottom: 36, animation: "fadeIn 0.4s ease" }}>
         <h1 style={{ color: C.text, fontSize: 24, fontWeight: 700, margin: 0, fontFamily: "'Cormorant Garamond',Georgia,serif" }}>
-          Bonjour, <span style={{ color: C.gold }}>{import.meta.env.VITE_COACH_NAME}</span> 👋
+          Bonjour, <span style={{ color: C.gold }}>{import.meta.env.VITE_COACH_NAME}</span>
         </h1>
         <p style={{ color: C.muted, fontSize: 13, marginTop: 6, marginBottom: 0 }}>
           {now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}

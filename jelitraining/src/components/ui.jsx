@@ -1,3 +1,4 @@
+import { Inbox, Save, CheckCircle2, AlertTriangle } from "lucide-react";
 import { C, iStyle } from "../theme.js";
 
 export function Input({ style, ...p }) {
@@ -43,10 +44,11 @@ export function Tag({ children, color = C.muted }) {
     </span>
   );
 }
-export function Empty({ icon = "📭", text }) {
+export function Empty({ icon, text }) {
+  const node = icon ?? <Inbox size={36} strokeWidth={1.5} />;
   return (
     <div style={{ padding: "56px 24px", textAlign: "center", background: C.s1, borderRadius: 14, border: `1px solid ${C.border}`, animation: "fadeIn 0.4s ease" }}>
-      <div style={{ fontSize: 38, marginBottom: 14, filter: "grayscale(0.2)" }}>{icon}</div>
+      <div style={{ marginBottom: 14, color: C.muted, display: "flex", justifyContent: "center" }}>{node}</div>
       <p style={{ color: C.muted, margin: 0, fontSize: 14, lineHeight: 1.6 }}>{text}</p>
     </div>
   );
@@ -98,18 +100,24 @@ export function ItemRow({ left, right, onDelete }) {
 export function SaveBadge({ status }) {
   if (status === "idle") return null;
   const map = {
-    saving: { bg: "rgba(201,168,76,0.15)", border: "rgba(201,168,76,0.4)", color: C.gold, text: "💾 Sauvegarde…" },
-    saved:  { bg: "rgba(90,170,90,0.15)",  border: "rgba(90,170,90,0.4)",  color: C.green, text: "✓ Sauvegardé" },
-    error:  { bg: "rgba(204,68,68,0.15)",  border: "rgba(204,68,68,0.4)",  color: C.red,   text: "⚠ Erreur save" },
+    saving: { bg: "rgba(201,168,76,0.15)", border: "rgba(201,168,76,0.4)", color: C.gold, label: "Sauvegarde…", Icon: Save },
+    saved:  { bg: "rgba(90,170,90,0.15)",  border: "rgba(90,170,90,0.4)",  color: C.green, label: "Sauvegardé", Icon: CheckCircle2 },
+    error:  { bg: "rgba(204,68,68,0.15)",  border: "rgba(204,68,68,0.4)",  color: C.red,   label: "Erreur save", Icon: AlertTriangle },
   };
   const s = map[status];
   return (
-    <span style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.color, borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, transition: "all 0.3s", animation: "fadeIn 0.3s ease" }}>
-      {s.text}
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, background: s.bg, border: `1px solid ${s.border}`, color: s.color, borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 600, transition: "all 0.3s", animation: "fadeIn 0.3s ease" }}>
+      <s.Icon size={12} strokeWidth={2} />
+      {s.label}
     </span>
   );
 }
 export function typeColor(t) {
   return { Muscu: C.gold, Cardio: "#5aaccc", Stretching: "#9a77cc", HIIT: "#cc5555", Circuit: "#5acc99", Autre: C.muted }[t] || C.muted;
+}
+export function IconText({ icon, children, gap = 6 }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap }}>{icon}{children}</span>
+  );
 }
 export { iStyle };

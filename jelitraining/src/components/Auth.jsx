@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff, KeyRound, CheckCircle2 } from "lucide-react";
 import { C, iStyle } from "../theme.js";
 import { hashPw } from "../lib.js";
 import { sbGetPw, sbSetPw, AUTH_KEY, DEFAULT_PW } from "../api.js";
@@ -53,11 +54,12 @@ export function LoginScreen({ onAuth }) {
               placeholder="••••••••" autoFocus
               style={{ ...iStyle, border: `1px solid ${error ? C.red : C.border}`, padding: "12px 42px 12px 14px", fontSize: 15, transition: "border-color 0.2s, box-shadow 0.2s" }}
             />
-            <button onClick={() => setShow(s => !s)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 15, padding: 4, lineHeight: 1, borderRadius: 4, transition: "color 0.15s" }}
+            <button onClick={() => setShow(s => !s)} aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.muted, cursor: "pointer", padding: 6, lineHeight: 0, borderRadius: 6, transition: "color 0.15s", display: "flex", alignItems: "center", justifyContent: "center" }}
               onMouseEnter={e => e.currentTarget.style.color = C.text}
               onMouseLeave={e => e.currentTarget.style.color = C.muted}
             >
-              {show ? "🙈" : "👁"}
+              {show ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
             </button>
           </div>
           {error && <div style={{ color: C.red, fontSize: 12, marginBottom: 14, textAlign: "center", animation: "fadeIn 0.2s ease" }}>Mot de passe incorrect</div>}
@@ -96,10 +98,12 @@ export function ChangePasswordModal({ onClose }) {
   };
 
   return (
-    <Modal title="🔑 CHANGER LE MOT DE PASSE" onClose={onClose}>
+    <Modal title={<span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><KeyRound size={14} strokeWidth={2} /> CHANGER LE MOT DE PASSE</span>} onClose={onClose}>
       {success
         ? <div style={{ textAlign: "center", padding: "24px 0", animation: "fadeInScale 0.3s ease" }}>
-            <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
+            <div style={{ marginBottom: 14, display: "flex", justifyContent: "center" }}>
+              <CheckCircle2 size={44} strokeWidth={1.5} color={C.green} />
+            </div>
             <div style={{ color: C.green, fontWeight: 700, fontSize: 15 }}>Mot de passe mis à jour !</div>
           </div>
         : <>

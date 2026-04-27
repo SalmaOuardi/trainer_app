@@ -14,7 +14,7 @@ export const C = {
 };
 
 export const iStyle = {
-  width: "100%", background: C.s3, border: `1px solid ${C.border}`,
+  width: "100%", backgroundColor: C.s3, border: `1px solid ${C.border}`,
   borderRadius: 10, padding: "11px 14px", color: C.text, fontSize: 14,
   outline: "none", boxSizing: "border-box", fontFamily: "inherit",
   transition: "border-color 0.2s, box-shadow 0.2s",

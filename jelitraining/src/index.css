@@ -116,9 +116,12 @@ input:focus, select:focus, textarea:focus {
 
   /* Settings → Disponibilités hebdomadaires: the 4-col [day | start | end | repos]
      row squeezes time inputs below their iOS-native min width. Restructure to
-     2 rows: [day name | repos checkbox] on top, [start | end] below. */
+     2 rows: [day name | repos checkbox] on top, [start | end] below.
+     Use 1fr 1fr (not 1fr auto) so the two time inputs on the bottom row get
+     equal widths — `auto` would size col 2 to the "Repos" checkbox, leaving
+     the end-time input visibly narrower than the start-time input. */
   .availability-row {
-    grid-template-columns: 1fr auto !important;
+    grid-template-columns: 1fr 1fr !important;
     grid-template-rows: auto auto !important;
     row-gap: 10px !important;
   }

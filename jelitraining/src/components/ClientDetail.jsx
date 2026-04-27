@@ -600,9 +600,11 @@ export function ClientDetailView({ client, tab, onTab, onBack, handlers, mutatio
             </div>
           </div>
           <div className="detail-actions" style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, flexWrap: "wrap" }}>
-            {pendingAmt > 0 && <Btn variant="orange" onClick={() => setRelanceOpen(true)}>
-              <IconText icon={<Send size={13} strokeWidth={2} />}>Relance impayé</IconText>
-            </Btn>}
+            {pendingAmt > 0 && <div className="detail-action-relance">
+              <Btn variant="orange" onClick={() => setRelanceOpen(true)}>
+                <IconText icon={<Send size={13} strokeWidth={2} />}>Relance impayé</IconText>
+              </Btn>
+            </div>}
             <Sel value={client.status || "actif"} onChange={e => mutations.updateStatus(e.target.value)} style={{ width: "auto", padding: "7px 12px", fontSize: 12 }}>
               <option value="actif">Actif</option><option value="inactif">Inactif</option>
             </Sel>

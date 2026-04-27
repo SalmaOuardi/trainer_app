@@ -96,8 +96,11 @@ input:focus, select:focus, textarea:focus {
   .detail-avatar span { font-size: 19px !important; }
   .detail-meta { gap: 8px 14px !important; }
   .detail-stats { gap: 14px !important; margin-top: 14px !important; padding-top: 14px !important; }
-  .detail-actions { width: 100%; }
-  .detail-actions > * { flex: 1; min-width: 0; }
+  .detail-actions { width: 100%; align-items: stretch !important; }
+  .detail-actions > * { min-width: 0; }
+  .detail-actions > *:not(.detail-action-relance) { flex: 1; }
+  .detail-action-relance { flex: 0 0 100% !important; width: 100%; }
+  .detail-action-relance > button { width: 100%; justify-content: center; }
 
   /* Tab bar */
   .tab-bar { padding-left: 12px !important; gap: 0 !important; }

@@ -185,12 +185,12 @@ function MonthView({ cursor, today, byDay, onPick }) {
   const currentMonth = cursor.getMonth();
   return (
     <div style={{ background: C.s1, border: `1px solid ${C.border}`, borderRadius: 14, padding: "10px 8px 12px", boxShadow: C.shadow1 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, padding: "2px 4px 8px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 2, padding: "2px 4px 8px" }}>
         {WEEKDAY_SHORT_FR.map(w => (
           <div key={w} style={{ textAlign: "center", color: C.muted, fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>{w}</div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 4 }}>
         {grid.map((d, i) => {
           const key = ymd(d);
           const inMonth = d.getMonth() === currentMonth;
@@ -203,6 +203,7 @@ function MonthView({ cursor, today, byDay, onPick }) {
               onClick={() => onPick(d)}
               style={{
                 aspectRatio: "1 / 1",
+                minWidth: 0, overflow: "hidden",
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start",
                 padding: "6px 4px 4px",
                 background: isToday ? C.goldAlpha : (hasAny ? C.s2 : "transparent"),

@@ -10,7 +10,7 @@
 
 - **Branch of record:** `main`
 - **Last merged:** PR #31 — Replace UI emojis with Lucide React icons (issue #19, polish)
-- **Active initiative:** none — issue #19 (mobile UX punch list) is fully shipped. Ready to pick the next thing.
+- **Active initiative:** Statistiques view — lifetime + period-scoped KPIs, 12-month revenue trend, top clients. Open on `SalmaOuardi/kabul`.
 - **Next target:** Phase 3c.1 — Bulk resend (manual button to send invites for all upcoming sessions of a client, or all in next N days)
 - **App status:** live in production, used by a real trainer. Do not break.
 - **Pending prod rollout:** `VITE_CALENDAR_ENABLED` is still `false` in Vercel Production — calendar + réglages tabs are built and shipped but not visible on the live app yet. Flip the env var + redeploy when ready to expose to the trainer.
@@ -31,6 +31,22 @@
 | 3c.1 | Bulk resend (one click → invites for all upcoming sessions of a client) | 💭 next (after #19) | — |
 | 3c.2 | Auto-send on event create (with safety guards: ≥ tomorrow, opt-in toggle) | 💭 later | — |
 | later | Recurring events, reminders, client view | 💭 not planned | — |
+
+---
+
+## Statistiques (analytics view)
+
+Lifetime + period-scoped trainer reporting. Always-visible nav item (not behind `VITE_CALENDAR_ENABLED`).
+
+| Piece | Status |
+|---|---|
+| `src/stats-utils.js` — pure aggregation: `periodBounds`, `statsForRange`, `lifetimeStats`, `pctDelta`, `monthlyRevenueSeries`, `topClients` | ✅ shipped |
+| `src/stats-utils.test.js` — 28 tests covering windowing, paid-only revenue, distinct clients, deltas, zero-fill series | ✅ shipped |
+| `src/components/Stats.jsx` — KPI cards (lifetime + period), period selector (semaine/mois/année/tout), 12-mo Recharts bar chart, top-5 clients with progress bars, empty state | ✅ shipped |
+
+**Earnings rule (locked):** revenue = `payment.status === "payé"` only. Pending is shown separately, never folded into revenue. Don't change without consulting the trainer.
+
+**Distinct-client counting:** "Clients entraînés" in any window = unique clients with ≥1 session in that window. `totalClients` is the roster size (active + inactive).
 
 ---
 

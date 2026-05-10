@@ -172,11 +172,11 @@ function TopClients({ rows, onSelectClient }) {
             onClick={() => onSelectClient && onSelectClient(r.clientId)}
             onMouseEnter={e => { e.currentTarget.style.background = C.s3; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-            style={{ display: "grid", gridTemplateColumns: "28px 1fr auto", alignItems: "center", gap: 12, padding: "10px 8px", borderBottom: idx < rows.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", borderRadius: 8, marginLeft: -8, marginRight: -8, transition: "background 0.15s" }}
+            style={{ display: "grid", gridTemplateColumns: "28px minmax(0, 1fr) auto", alignItems: "center", gap: 12, padding: "10px 8px", borderBottom: idx < rows.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", borderRadius: 8, marginLeft: -8, marginRight: -8, transition: "background 0.15s" }}
           >
             <div style={{ color: idx === 0 ? C.gold : C.muted, fontSize: 12, fontWeight: 700, fontFamily: "'Cormorant Garamond',Georgia,serif", textAlign: "center" }}>#{idx + 1}</div>
-            <div>
-              <div style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{r.clientName}</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: C.text, fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.clientName}</div>
               <div style={{ marginTop: 6, height: 4, background: C.s3, borderRadius: 4, overflow: "hidden" }}>
                 <div style={{ width: `${pct}%`, height: "100%", background: `linear-gradient(90deg, ${C.gold}, ${C.goldLight})`, borderRadius: 4 }} />
               </div>

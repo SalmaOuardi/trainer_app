@@ -337,18 +337,22 @@ function AnchorNav({ period, anchor, setAnchor, now, years }) {
         <ChevronRight size={16} strokeWidth={2} />
       </NavIconBtn>
 
-      {!atCurrent && (
-        <button
-          onClick={() => setAnchor(new Date())}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldBorder; e.currentTarget.style.color = C.gold; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; }}
-          style={{ ...navIconStyle, width: "auto", padding: "0 12px", gap: 6, fontSize: 12, fontFamily: "inherit" }}
-          aria-label="Revenir à la période actuelle"
-        >
-          <RotateCcw size={13} strokeWidth={2} />
-          Aujourd'hui
-        </button>
-      )}
+      <button
+        onClick={() => setAnchor(new Date())}
+        disabled={atCurrent}
+        onMouseEnter={e => { if (!atCurrent) { e.currentTarget.style.borderColor = C.goldBorder; e.currentTarget.style.color = C.gold; } }}
+        onMouseLeave={e => { if (!atCurrent) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted; } }}
+        style={{
+          ...navIconStyle,
+          width: "auto", padding: "0 12px", gap: 6, fontSize: 12, fontFamily: "inherit",
+          cursor: atCurrent ? "default" : "pointer",
+          opacity: atCurrent ? 0.45 : 1,
+        }}
+        aria-label="Revenir à la période actuelle"
+      >
+        <RotateCcw size={13} strokeWidth={2} />
+        Aujourd'hui
+      </button>
     </div>
   );
 }
@@ -443,15 +447,17 @@ export function StatsView({ clients, onSelectClient }) {
           </Panel>
 
           {/* Period band — selector + anchor nav + KPIs scoped to the chosen window. */}
-          <div style={{ marginTop: 28, marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-            <h2 style={{ color: C.text, fontSize: 16, fontWeight: 600, margin: 0 }}>Sur la période</h2>
-            <PeriodSelector value={period} onChange={onPeriodChange} />
-          </div>
-          {period !== "all" && (
-            <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
-              <AnchorNav period={period} anchor={anchor} setAnchor={setAnchor} now={now} years={years} />
+          <div style={{ marginTop: 28, marginBottom: 16 }}>
+            <h2 style={{ color: C.text, fontSize: 16, fontWeight: 600, margin: "0 0 14px" }}>Sur la période</h2>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: period !== "all" ? 12 : 0 }}>
+              <PeriodSelector value={period} onChange={onPeriodChange} />
             </div>
-          )}
+            {period !== "all" && (
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <AnchorNav period={period} anchor={anchor} setAnchor={setAnchor} now={now} years={years} />
+              </div>
+            )}
+          </div>
           <div className="grid-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 28 }}>
             <KpiCard
               label={`Revenus ${periodWord}`}

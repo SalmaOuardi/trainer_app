@@ -12,6 +12,7 @@ import { ClientsView } from "./components/Clients.jsx";
 import { AddClientModal, ClientDetailView } from "./components/ClientDetail.jsx";
 import { CalendarView } from "./components/Calendar.jsx";
 import { SettingsView } from "./components/Settings.jsx";
+import { StatsView } from "./components/Stats.jsx";
 
 const CALENDAR_ENABLED = import.meta.env.VITE_CALENDAR_ENABLED === "true";
 
@@ -175,6 +176,7 @@ export default function App() {
     { id: "dashboard", icon: "◈", label: "Dashboard" },
     { id: "clients", icon: "◉", label: "Mes clients" },
     ...(CALENDAR_ENABLED ? [{ id: "calendar", icon: "◐", label: "Calendrier" }] : []),
+    { id: "stats", icon: "◆", label: "Statistiques" },
     ...(CALENDAR_ENABLED ? [{ id: "settings", icon: "⚙︎", label: "Réglages" }] : []),
   ];
   const closeNav = () => setSideOpen(false);
@@ -240,6 +242,7 @@ export default function App() {
         <main style={{ flex: 1, overflowY: "auto" }}>
           {view === "dashboard" && <DashboardView stats={stats} clients={clients} onSelectClient={goTo} />}
           {view === "clients" && <ClientsView clients={clients} search={search} onSearch={setSearch} onSelect={id => goTo(id)} onAdd={() => setModal("addClient")} />}
+          {view === "stats" && <StatsView clients={clients} onSelectClient={id => goTo(id, "payments")} />}
           {view === "calendar" && CALENDAR_ENABLED && <CalendarView
             clients={clients}
             availability={availability}

@@ -8,28 +8,40 @@ import { Modal, Field, Btn } from "./ui.jsx";
 export function LoginScreen({ onAuth }) {
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (!pw.trim()) return;
     setLoading(true);
-    const entered = await hashPw(pw);
-    let stored = await sbGetPw();
-    if (!stored) {
-      const defaultHash = await hashPw(DEFAULT_PW);
-      await sbSetPw(defaultHash);
-      stored = defaultHash;
+    setError(false);
+    setNetworkError(false);
+    try {
+      const entered = await hashPw(pw);
+      let stored = await sbGetPw();
+      if (!stored) {
+        const defaultHash = await hashPw(DEFAULT_PW);
+        await sbSetPw(defaultHash);
+        stored = defaultHash;
+      }
+      if (entered === stored) {
+        localStorage.setItem(AUTH_KEY, "1");
+        onAuth();
+      } else {
+        setError(true);
+        setPw("");
+        setTimeout(() => setError(false), 2000);
+      }
+    } catch (err) {
+      // Network failure, missing Supabase env, etc. Surface it clearly so the
+      // button doesn't sit on "Vérification…" forever.
+      console.error("Login failed:", err);
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 4000);
+    } finally {
+      setLoading(false);
     }
-    if (entered === stored) {
-      localStorage.setItem(AUTH_KEY, "1");
-      onAuth();
-    } else {
-      setError(true);
-      setPw("");
-      setTimeout(() => setError(false), 2000);
-    }
-    setLoading(false);
   };
 
   return (
@@ -63,6 +75,7 @@ export function LoginScreen({ onAuth }) {
             </button>
           </div>
           {error && <div style={{ color: C.red, fontSize: 12, marginBottom: 14, textAlign: "center", animation: "fadeIn 0.2s ease" }}>Mot de passe incorrect</div>}
+          {networkError && <div style={{ color: C.red, fontSize: 12, marginBottom: 14, textAlign: "center", animation: "fadeIn 0.2s ease", lineHeight: 1.5 }}>Impossible de joindre le serveur.<br />Vérifie ta connexion et réessaie.</div>}
           <button onClick={submit} disabled={loading}
             onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = C.shadowGold; } }}
             onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}

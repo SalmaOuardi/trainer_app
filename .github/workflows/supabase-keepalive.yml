@@ -1,0 +1,42 @@
+name: Supabase keep-alive
+
+# Free-tier Supabase pauses projects after ~7 days of zero API activity.
+# This workflow makes one tiny read against the production project on a
+# daily cron so the idle timer is always reset, even if the trainer takes
+# a long break and the iOS calendar subscription stops polling.
+#
+# Cost: ~5 seconds of GitHub Actions runtime per day. Well within free tier.
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL  — e.g. https://<project>.supabase.co  (production project only)
+#   SUPABASE_KEY  — the anon/publishable key
+#
+# To trigger manually for testing: Actions tab → Supabase keep-alive → Run workflow.
+
+on:
+  schedule:
+    # Daily at 12:00 UTC. Cron times are UTC; pick anything stable.
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::Missing SUPABASE_URL or SUPABASE_KEY secret."
+            exit 1
+          fi
+          # -f makes curl fail loudly on HTTP >= 400. -sS keeps stderr useful but quiet otherwise.
+          # We read one row from the store table — minimal payload, never mutates.
+          curl -fsS \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/store?select=key&limit=1" \
+            > /dev/null
+          echo "Supabase reachable — idle timer reset."

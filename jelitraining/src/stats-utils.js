@@ -12,6 +12,7 @@
 import { startOfWeek, startOfMonth, addDays, addMonths, parseYmd, MONTH_NAMES_FR } from "./calendar-utils.js";
 
 export const PAID = "payé";
+export const PENDING = "en attente";
 
 // ─── Period bounds ──────────────────────────────────────────────────────────
 
@@ -222,4 +223,36 @@ export const topClients = (clients, { start = null, end = null, metric = "revenu
     .filter(r => score(r) > 0)
     .sort((a, b) => score(b) - score(a))
     .slice(0, limit);
+};
+
+// ─── Unpaid balances (for the dashboard follow-up panel) ────────────────────
+
+// Clients with outstanding "en attente" payments, largest balance first.
+// Each row: { clientId, clientName, total, count } — `total` is the summed
+// amount owed, `count` how many pending payments. Clients who owe nothing
+// are omitted. Not windowed: a debt is a debt regardless of when it was logged.
+export const unpaidByClient = (clients, limit = 6) => {
+  if (!Array.isArray(clients)) return [];
+  const rows = [];
+  for (const c of clients) {
+    if (!c) continue;
+    let total = 0;
+    let count = 0;
+    const ps = Array.isArray(c.payments) ? c.payments : [];
+    for (const p of ps) {
+      if (!p || p.status !== PENDING) continue;
+      const amt = Number(p.amount);
+      if (!Number.isFinite(amt)) continue;
+      total += amt;
+      count += 1;
+    }
+    if (count === 0) continue;
+    rows.push({
+      clientId: c.id,
+      clientName: [c.firstName, c.lastName].filter(Boolean).join(" ").trim() || "Client",
+      total,
+      count,
+    });
+  }
+  return rows.sort((a, b) => b.total - a.total).slice(0, limit);
 };

@@ -10,6 +10,7 @@ import {
   pctDelta,
   monthlyRevenueSeries,
   topClients,
+  unpaidByClient,
 } from "./stats-utils.js";
 
 // Helpers for fixtures.
@@ -243,5 +244,47 @@ describe("stats-utils — topClients", () => {
     });
     // Only Bob's May 2 payment falls in [May 2, May 3).
     expect(ranked.map(r => r.clientId)).toEqual(["c2"]);
+  });
+
+  describe("unpaidByClient", () => {
+    const PENDING = "en attente";
+    const clients = [
+      client("c1", "Amine", [
+        payment("p1", "2026-04-01", 50, PAID),
+        payment("p2", "2026-04-10", 30, PENDING),
+        payment("p3", "2026-04-20", 20, PENDING),
+      ]),
+      client("c2", "Bob", [
+        payment("p4", "2026-05-01", 120, PENDING),
+      ]),
+      client("c3", "Clara", [
+        payment("p5", "2026-05-02", 80, PAID),
+      ]),
+    ];
+
+    it("sums pending payments per client and omits those who owe nothing", () => {
+      const rows = unpaidByClient(clients);
+      expect(rows.map(r => r.clientId)).toEqual(["c2", "c1"]);
+      expect(rows.find(r => r.clientId === "c1")).toMatchObject({ total: 50, count: 2 });
+      expect(rows.find(r => r.clientId === "c2")).toMatchObject({ total: 120, count: 1 });
+    });
+
+    it("sorts by total owed, largest first", () => {
+      expect(unpaidByClient(clients).map(r => r.total)).toEqual([120, 50]);
+    });
+
+    it("respects the limit", () => {
+      expect(unpaidByClient(clients, 1).map(r => r.clientId)).toEqual(["c2"]);
+    });
+
+    it("ignores non-numeric amounts", () => {
+      const bad = [client("c1", "Amine", [payment("p1", "2026-04-01", "abc", PENDING)])];
+      expect(unpaidByClient(bad)).toEqual([]);
+    });
+
+    it("returns an empty array for empty or invalid input", () => {
+      expect(unpaidByClient([])).toEqual([]);
+      expect(unpaidByClient(undefined)).toEqual([]);
+    });
   });
 });

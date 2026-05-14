@@ -110,6 +110,17 @@ export const flattenSessions = (clients) => {
   return out;
 };
 
+// Sessions from today onward, soonest first. "Today" is date-only, so a
+// session earlier today still counts as upcoming. Within a day, timed
+// sessions sort before untimed (compareEvents). Returns at most `limit`.
+export const upcomingSessions = (clients, now = new Date(), limit = 6) => {
+  const todayKey = ymd(now);
+  return flattenSessions(clients)
+    .filter(s => s.date >= todayKey)
+    .sort((a, b) => (a.date === b.date ? compareEvents(a, b) : a.date.localeCompare(b.date)))
+    .slice(0, limit);
+};
+
 // Group events by YYYY-MM-DD string, returns a Map<string, event[]>.
 export const groupByDay = (events) => {
   const map = new Map();

@@ -1,5 +1,6 @@
 import { C } from "../theme.js";
 import { fdate, fmoney } from "../utils.js";
+import { ymd, upcomingSessions } from "../calendar-utils.js";
 
 function StatCard({ label, value, sub, accent, delay = 0 }) {
   return (
@@ -15,13 +16,16 @@ function StatCard({ label, value, sub, accent, delay = 0 }) {
 }
 
 export function DashboardView({ stats, clients, onSelectClient }) {
+  const now = new Date();
+  const todayKey = ymd(now);
+  const upcoming = upcomingSessions(clients, now, 6);
   const allSessions = clients
     .flatMap(c => (c.sessions || []).map(s => ({ ...s, clientName: `${c.firstName} ${c.lastName}`, clientId: c.id })))
+    .filter(s => s.date <= todayKey)
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
   const allPayments = clients
     .flatMap(c => (c.payments || []).map(p => ({ ...p, clientName: `${c.firstName} ${c.lastName}`, clientId: c.id })))
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
-  const now = new Date();
 
   return (
     <div className="page" style={{ padding: "40px 44px", maxWidth: 1100 }}>
@@ -38,6 +42,28 @@ export function DashboardView({ stats, clients, onSelectClient }) {
         <StatCard label="Séances ce mois" value={stats.sessions} sub="toutes formules" delay={60} />
         <StatCard label="Revenus ce mois" value={fmoney(stats.revenue)} sub="paiements validés" delay={120} />
         <StatCard label="En attente" value={fmoney(stats.pending)} sub="à encaisser" accent delay={180} />
+      </div>
+      <div style={{ background: `linear-gradient(180deg, ${C.s1}, ${C.s2})`, border: `1px solid ${C.border}`, borderRadius: 14, padding: "22px 24px", boxShadow: C.shadow1, marginBottom: 20, animation: "slideUp 0.4s ease both", animationDelay: "240ms" }}>
+        <div style={{ color: C.gold, fontWeight: 700, fontSize: 11, letterSpacing: "0.1em", marginBottom: 18 }}>À VENIR</div>
+        {upcoming.length === 0
+          ? <p style={{ color: C.muted, fontSize: 13, margin: 0 }}>Aucune séance à venir</p>
+          : upcoming.map((s, idx) => (
+              <div key={s.sessionId} onClick={() => onSelectClient(s.clientId, "sessions")}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 8px", borderBottom: idx < upcoming.length - 1 ? `1px solid ${C.border}` : "none", cursor: "pointer", borderRadius: 8, marginLeft: -8, marginRight: -8, transition: "background 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.background = C.s3; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <div>
+                  <div style={{ color: C.text, fontSize: 13, fontWeight: 500 }}>{s.clientName}</div>
+                  <div style={{ color: C.muted, fontSize: 12, marginTop: 2 }}>{s.type} · {s.duration} min</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ color: C.text, fontSize: 12, fontWeight: 500 }}>{fdate(s.date)}</div>
+                  {s.startTime && <div style={{ color: C.gold, fontSize: 11, marginTop: 2 }}>{s.startTime}</div>}
+                </div>
+              </div>
+            ))
+        }
       </div>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         {[

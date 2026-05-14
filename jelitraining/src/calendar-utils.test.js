@@ -4,6 +4,7 @@ import {
   startOfWeek, startOfMonth, monthGrid, weekDays,
   flattenSessions, groupByDay, colorForType,
   compareEvents, minutesFromTime, addMinutesToTime,
+  upcomingSessions,
 } from "./calendar-utils.js";
 
 describe("calendar-utils", () => {
@@ -143,5 +144,42 @@ describe("calendar-utils", () => {
     expect(addMinutesToTime("09:00", 0)).toBeNull();
     expect(addMinutesToTime(null, 60)).toBeNull();
     expect(addMinutesToTime("09:00", "abc")).toBeNull();
+  });
+
+  describe("upcomingSessions", () => {
+    const now = new Date(2026, 3, 22); // 2026-04-22
+    const clients = [
+      { id: "c1", firstName: "Amine", lastName: "K", sessions: [
+        { id: "past", date: "2026-04-20", type: "Muscu", duration: "60" },
+        { id: "today-pm", date: "2026-04-22", type: "Cardio", duration: "45", startTime: "16:00" },
+        { id: "soon", date: "2026-04-25", type: "HIIT", duration: "30" },
+      ]},
+      { id: "c2", firstName: "Sofia", lastName: "B", sessions: [
+        { id: "today-am", date: "2026-04-22", type: "Muscu", duration: "60", startTime: "09:00" },
+        { id: "today-untimed", date: "2026-04-22", type: "Yoga", duration: "60" },
+        { id: "later", date: "2026-04-30", type: "Cardio", duration: "45" },
+      ]},
+    ];
+
+    it("keeps sessions from today onward, drops past ones", () => {
+      const ids = upcomingSessions(clients, now).map(s => s.sessionId);
+      expect(ids).not.toContain("past");
+      expect(ids).toContain("today-am");
+    });
+
+    it("sorts ascending by date, then timed-before-untimed within a day", () => {
+      const ids = upcomingSessions(clients, now).map(s => s.sessionId);
+      expect(ids).toEqual(["today-am", "today-pm", "today-untimed", "soon", "later"]);
+    });
+
+    it("respects the limit", () => {
+      expect(upcomingSessions(clients, now, 2).map(s => s.sessionId))
+        .toEqual(["today-am", "today-pm"]);
+    });
+
+    it("returns an empty array when nothing is upcoming", () => {
+      expect(upcomingSessions(clients, new Date(2027, 0, 1))).toEqual([]);
+      expect(upcomingSessions([], now)).toEqual([]);
+    });
   });
 });
